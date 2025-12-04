@@ -1,16 +1,18 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+/**
+ * Main App Component
+ *
+ * Wraps the application with necessary providers and router
+ */
+
+import { WagmiProvider } from "./app/providers/WagmiProvider";
+import { AppRouter } from "./app/router";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      hello
-    </>
-  )
+    <WagmiProvider>
+      <AppRouter />
+    </WagmiProvider>
+  );
 }
 
-export default App
+export default App;
