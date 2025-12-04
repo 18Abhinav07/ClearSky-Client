@@ -15,14 +15,16 @@ import type { Config } from "@coinbase/cdp-core";
 import { CDPReactProvider } from "@coinbase/cdp-react";
 import { env } from "../../config/env";
 
-// CDP Configuration - MINIMAL (matching documentation)
+// CDP Configuration
+// Valid properties: projectId, basePath, ethereum, solana, customAuth, useMock, debugging, disableAnalytics
 const cdpConfig: Config = {
   projectId: env.CDP_PROJECT_ID,
+  basePath: env.CDP_API_BASE_PATH, // Explicitly set base path for API calls
   ethereum: {
     createOnLogin: "eoa", // Required: Create EVM account on login
   },
-  // REMOVED: basePath, useMock, debugging, appName, appLogoUrl
-  // These might be causing initialization issues
+  debugging: true, // Enable debugging to see detailed auth flow logs
+  disableAnalytics: false, // Keep analytics for better error tracking
 };
 
 // Create CDP Embedded Wallet Connector

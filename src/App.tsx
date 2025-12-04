@@ -1,17 +1,17 @@
 /**
- * Main App Component
+ * Main App Component - TESTING: Minimal CDP Provider
  *
  * Wraps the application with necessary providers and router
  */
 
-import { WagmiProvider } from "./app/providers/WagmiProvider";
+import { MinimalCDPProvider } from "./app/providers/MinimalCDPProvider";
 import { AppRouter } from "./app/router";
 
 function App() {
   return (
-    <WagmiProvider>
+    <MinimalCDPProvider>
       <AppRouter />
-    </WagmiProvider>
+    </MinimalCDPProvider>
   );
 }
 

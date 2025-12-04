@@ -1,26 +1,22 @@
 /**
  * useAuth Hook
  *
- * Combines CDP authentication with signature-based device registration
- * This hook handles the two-step authentication process:
+ * Simplified authentication flow:
  * 1. CDP Email Authentication → Wallet Creation
- * 2. Message Signing → Device Registration
+ * 2. Send wallet address to backend → Get tokens
  */
 
 import { useState } from "react";
-import { useAccount, useSignMessage } from "wagmi";
+import { useAccount } from "wagmi";
 import { useAuthStore } from "../app/store/authStore";
 import {
-  requestChallenge,
-  registerDevice,
+  loginWithWallet,
   storeTokens,
   clearTokens,
 } from "../services/api/auth.service";
-import { getDeviceInfo } from "../utils/device";
 
 export function useAuth() {
   const { address, isConnected } = useAccount();
-  const { signMessageAsync } = useSignMessage();
   const [isRegistering, setIsRegistering] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,12 +27,11 @@ export function useAuth() {
    * Complete device registration flow
    * Called AFTER CDP authentication is complete and wallet is available
    *
-   * Process:
-   * 1. Request challenge from backend
-   * 2. Sign challenge with user's CDP wallet
-   * 3. Send signature + wallet address to backend
-   * 4. Backend verifies signature and registers device
-   * 5. Store tokens and update auth state
+   * Simplified Process:
+   * 1. Send wallet address to backend via GET /login/:walletPublicKey
+   * 2. Backend creates user/device if not exists
+   * 3. Backend returns tokens, devices, and limits
+   * 4. Store tokens and update auth state
    */
   const completeDeviceRegistration = async () => {
     if (!address || !isConnected) {
@@ -48,40 +43,28 @@ export function useAuth() {
     setError(null);
 
     try {
-      // Step 1: Request challenge from backend
-      console.log("Requesting authentication challenge...");
-      const challenge = await requestChallenge();
+      console.log("[Auth] Logging in with wallet:", address);
 
-      // Step 2: Sign the challenge message with user's wallet
-      console.log("Signing challenge message...");
-      const signature = await signMessageAsync({
-        message: challenge.challenge,
-      });
+      // Call backend to login/register with wallet address
+      const response = await loginWithWallet(address);
 
-      // Step 3: Send registration request to backend
-      console.log("Registering device...");
-      const deviceInfo = getDeviceInfo();
-      const response = await registerDevice({
-        walletAddress: address,
-        signature,
-        message: challenge.challenge,
-        deviceInfo,
-      });
+      console.log("[Auth] Login successful!");
+      console.log("[Auth] Devices:", response.devices);
+      console.log("[Auth] Limited:", response.limited);
 
-      // Step 4: Store tokens and update auth state
+      // Store tokens and update auth state
       storeTokens(response.tokens);
       setAuth({
         ...response,
         walletAddress: address,
       });
 
-      console.log("Device registration successful!");
       return response;
     } catch (err) {
       const errorMessage =
-        err instanceof Error ? err.message : "Device registration failed";
+        err instanceof Error ? err.message : "Login failed";
       setError(errorMessage);
-      console.error("Device registration error:", err);
+      console.error("[Auth] Login error:", err);
       throw err;
     } finally {
       setIsRegistering(false);
