@@ -18,7 +18,11 @@ import { ROUTES } from "../../config/routes";
 
 type Step = 1 | 2 | 3 | 4;
 
-export function DeviceRegistrationForm() {
+interface DeviceRegistrationFormProps {
+  onBack?: () => void;
+}
+
+export function DeviceRegistrationForm({ onBack }: DeviceRegistrationFormProps) {
   const navigate = useNavigate();
   const { setDevices } = useDeviceStore();
 
@@ -275,6 +279,14 @@ export function DeviceRegistrationForm() {
               ))}
             </div>
           )}
+
+          {/* Back Button */}
+          <button
+            onClick={() => setCurrentStep(1)}
+            className="mt-4 py-3 px-6 border border-border rounded-lg font-semibold hover:bg-secondary transition-colors"
+          >
+            Back to Cities
+          </button>
         </div>
       )}
 
@@ -327,15 +339,23 @@ export function DeviceRegistrationForm() {
             </p>
           </div>
 
-          {/* Proceed to Confirmation */}
-          {selectedSensorTypes.length > 0 && (
+          {/* Navigation Buttons */}
+          <div className="mt-6 flex gap-3">
             <button
-              onClick={() => setCurrentStep(4)}
-              className="mt-4 w-full py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              onClick={() => setCurrentStep(2)}
+              className="flex-1 py-3 border border-border rounded-lg font-semibold hover:bg-secondary transition-colors"
             >
-              Continue to Confirmation
+              Back to Stations
             </button>
-          )}
+            {selectedSensorTypes.length > 0 && (
+              <button
+                onClick={() => setCurrentStep(4)}
+                className="flex-1 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-opacity"
+              >
+                Continue to Confirmation
+              </button>
+            )}
+          </div>
         </div>
       )}
 

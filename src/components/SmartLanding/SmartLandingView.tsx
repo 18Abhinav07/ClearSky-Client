@@ -11,17 +11,30 @@ import { useDeviceStore } from "../../app/store/deviceStore";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../config/routes";
 
-export function SmartLandingView() {
+interface SmartLandingViewProps {
+  onRegisterClick?: () => void;
+}
+
+export function SmartLandingView({ onRegisterClick }: SmartLandingViewProps) {
   const { uiMode, count, limitReached, devices, isLoading } = useDeviceStore();
   const navigate = useNavigate();
 
   const handleRegisterDevice = () => {
-    // Navigate to device registration page
-    navigate(ROUTES.REGISTER_DEVICE);
+    // If onRegisterClick prop provided, use it (for same-page navigation)
+    // Otherwise navigate to register-device route
+    if (onRegisterClick) {
+      onRegisterClick();
+    } else {
+      navigate(ROUTES.REGISTER_DEVICE);
+    }
   };
 
   const handleGoToDashboard = () => {
     navigate(ROUTES.DASHBOARD);
+  };
+
+  const handleBackToLanding = () => {
+    navigate(ROUTES.LANDING);
   };
 
   if (isLoading) {
@@ -35,6 +48,27 @@ export function SmartLandingView() {
 
   return (
     <div className="w-full max-w-4xl mx-auto py-12 px-6">
+      {/* Back Button */}
+      <button
+        onClick={handleBackToLanding}
+        className="mb-6 flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+      >
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15 19l-7-7 7-7"
+          />
+        </svg>
+        Back to Home
+      </button>
+
       {/* MODE 0: New User - No Devices */}
       {uiMode === "MODE_0" && (
         <div className="text-center space-y-6">

@@ -1,18 +1,20 @@
 /**
  * Device Registration Page
  *
- * Full-page view for registering a new device
- * Shows the multi-step registration form
+ * Shows SmartLandingView (Welcome page) or DeviceRegistrationForm
+ * Based on user navigation
  */
 
 import { useNavigate } from "react-router-dom";
 import { DeviceRegistrationForm } from "../../components/DeviceRegistration/DeviceRegistrationForm";
+import { SmartLandingView } from "../../components/SmartLanding/SmartLandingView";
 import { useAuth } from "../../hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function RegisterDevice() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [showForm, setShowForm] = useState(false);
 
   // Redirect to landing if not authenticated
   useEffect(() => {
@@ -30,33 +32,43 @@ export default function RegisterDevice() {
     );
   }
 
-  return (
-    <div className="min-h-screen bg-background py-12">
-      {/* Back Button */}
-      <div className="container-main mb-6">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <svg
-            className="w-5 h-5"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+  // Show registration form if user clicked "Register Device" button
+  if (showForm) {
+    return (
+      <div className="min-h-screen bg-background py-12">
+        {/* Back Button */}
+        <div className="container-main mb-6">
+          <button
+            onClick={() => setShowForm(false)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
-          </svg>
-          Back
-        </button>
-      </div>
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M15 19l-7-7 7-7"
+              />
+            </svg>
+            Back
+          </button>
+        </div>
 
-      {/* Registration Form */}
-      <DeviceRegistrationForm />
+        {/* Registration Form */}
+        <DeviceRegistrationForm onBack={() => setShowForm(false)} />
+      </div>
+    );
+  }
+
+  // Show SmartLandingView (Welcome page) by default
+  return (
+    <div className="min-h-screen bg-background">
+      <SmartLandingView onRegisterClick={() => setShowForm(true)} />
     </div>
   );
 }

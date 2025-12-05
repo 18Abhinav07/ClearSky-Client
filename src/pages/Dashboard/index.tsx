@@ -17,12 +17,7 @@ export default function Dashboard() {
   /**
    * Redirect to landing if not authenticated
    */
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate(ROUTES.LANDING);
-    }
-  }, [isAuthenticated, navigate]);
-
+  
   const handleLogout = () => {
     logout();
     navigate(ROUTES.LANDING);
