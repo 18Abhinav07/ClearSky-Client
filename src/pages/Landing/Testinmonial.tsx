@@ -9,7 +9,7 @@ const Testimonials = () => {
             {/* Left - Quote */}
             <div className="p-10 lg:p-16 flex flex-col justify-center">
               <blockquote className="text-2xl lg:text-3xl font-semibold text-foreground leading-relaxed mb-8">
-                "We went from 3 to 28 people and Shielder helped us maintain the same level of efficiency. The automation saved us countless hours every week."
+                "We went from 3 to 28 people and ClearSky helped us maintain the same level of efficiency. The automation saved us countless hours every week."
               </blockquote>
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-full bg-electric-blue/20 flex items-center justify-center">

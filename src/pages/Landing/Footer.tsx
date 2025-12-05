@@ -20,7 +20,7 @@ const Footer = () => {
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
-              <span className="text-xl font-semibold">Shielder</span>
+              <span className="text-xl font-semibold">ClearSky</span>
             </div>
             <p className="text-primary-foreground/60 text-sm mb-4">
               Automate your startup workflows and scale delivery.
@@ -60,7 +60,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-primary-foreground/60 text-sm">
-            © 2024 Shielder. All rights reserved.
+            © 2024 ClearSky. All rights reserved.
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors text-sm">

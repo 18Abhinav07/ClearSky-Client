@@ -21,11 +21,12 @@ import type {
 export async function loginWithWallet(
   walletPublicKey: string
 ): Promise<DeviceRegistrationResponse> {
-  const response = await fetch(`${env.API_BASE_URL}/login/${walletPublicKey}`, {
-    method: "GET",
+  const response = await fetch(`${env.API_BASE_URL}/api/v1/auth/login`, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
+    body: JSON.stringify({ wallet_address: walletPublicKey }),
   });
 
   if (!response.ok) {
@@ -33,7 +34,16 @@ export async function loginWithWallet(
     throw new Error(error.message || "Failed to login with wallet");
   }
 
-  return response.json();
+  const result = await response.json();
+
+  // Backend returns { success: true, data: {...} }
+  // Extract the data object which contains our expected structure
+  if (result.success && result.data) {
+    return result.data;
+  }
+
+  // Fallback if structure is different
+  return result;
 }
 
 /**
@@ -60,6 +70,45 @@ export function getStoredTokens(): {
   if (!access_token || !refresh_token) return null;
 
   return { access_token, refresh_token };
+}
+
+/**
+ * Refresh access token using refresh token
+ * Called automatically when access token expires
+ */
+export async function refreshAccessToken(): Promise<{
+  access_token: string;
+  refresh_token: string;
+}> {
+  const refreshToken = localStorage.getItem("refresh_token");
+
+  if (!refreshToken) {
+    throw new Error("No refresh token found");
+  }
+
+  const response = await fetch(`${env.API_BASE_URL}/api/v1/auth/refresh`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refresh_token: refreshToken }),
+  });
+
+  if (!response.ok) {
+    // Refresh token is invalid/expired - user needs to login again
+    clearTokens();
+    throw new Error("REFRESH_TOKEN_EXPIRED");
+  }
+
+  const result = await response.json();
+
+  if (result.success && result.data) {
+    // Store new tokens
+    storeTokens(result.data);
+    return result.data;
+  }
+
+  throw new Error("Failed to refresh token");
 }
 
 /**

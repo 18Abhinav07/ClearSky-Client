@@ -1,58 +1,50 @@
 /**
- * Landing Page - With Auth Modal
+ * Landing Page - With Auth Modal + Smart Landing Logic
  *
  * Entry point for unauthenticated users
  * Features:
  * 1. Get Started button opens authentication modal
  * 2. CDP Email Authentication in modal
- * 3. Automatic device registration after wallet creation
- * 4. Navigation to dashboard on success
+ * 3. Automatic device registration + Smart Landing Page logic
+ * 4. Conditional UI based on device count (Mode 0/1/3)
  */
 
 import { useEffect, useState } from "react";
 import { AuthModal } from "../../components/Auth/AuthModal";
+import { SmartLandingView } from "../../components/SmartLanding/SmartLandingView";
 import { useAuth } from "../../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
-import { ROUTES } from "../../config/routes";
 import LandingPage from "./LandingPage";
 
 export default function Landing() {
   const { isConnected, isAuthenticated, completeDeviceRegistration, isRegistering, error } = useAuth();
-  const navigate = useNavigate();
   const [hasTriggeredRegistration, setHasTriggeredRegistration] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   /**
    * After CDP authentication completes (wallet connected),
-   * automatically trigger device registration
+   * automatically trigger device registration + Smart Landing logic
    */
   useEffect(() => {
     const handleDeviceRegistration = async () => {
       if (isConnected && !isAuthenticated && !hasTriggeredRegistration && !isRegistering) {
+        console.log("[Landing] Triggering device registration + Smart Landing logic");
         setHasTriggeredRegistration(true);
         try {
           await completeDeviceRegistration();
-          // Registration successful, navigate to dashboard
-          navigate(ROUTES.DASHBOARD);
+          console.log("[Landing] ✅ Device registration complete!");
+          console.log("[Landing] 🔥 Smart Landing Page data loaded - staying on this page");
+          // Note: We DON'T navigate to dashboard anymore
+          // User will see SmartLandingView with conditional UI
         } catch (err) {
-          console.error("Failed to complete device registration:", err);
+          console.error("[Landing] Failed to complete device registration:", err);
           setHasTriggeredRegistration(false); // Allow retry
         }
       }
     };
 
     handleDeviceRegistration();
-  }, [isConnected, isAuthenticated, hasTriggeredRegistration, isRegistering, completeDeviceRegistration, navigate]);
-
-  /**
-   * If already authenticated, redirect to dashboard
-   */
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate(ROUTES.DASHBOARD);
-    }
-  }, [isAuthenticated, navigate]);
-
+  }, [isConnected, isAuthenticated, hasTriggeredRegistration, isRegistering]);
+  
   const handleGetStarted = () => {
     setIsAuthModalOpen(true);
   };
@@ -79,6 +71,15 @@ export default function Landing() {
         >
           Try Again
         </button>
+      </div>
+    );
+  }
+
+  // Show SmartLandingView when authenticated, otherwise show marketing landing page
+  if (isConnected && isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SmartLandingView />
       </div>
     );
   }

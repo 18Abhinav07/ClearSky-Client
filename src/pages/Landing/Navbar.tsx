@@ -7,11 +7,9 @@ interface NavbarProps {
 
 const Navbar = ({ onGetStarted }: NavbarProps) => {
   const navLinks = [
-    { label: "Features", href: "#features" },
+    { label: "Marketplace", href: "/marketplace" },
     { label: "About us", href: "#about" },
-    { label: "Pricing", href: "#pricing" },
-    { label: "Blog", href: "#blog" },
-    { label: "Contact", href: "#contact" },
+    
   ];
 
   return (
@@ -24,7 +22,7 @@ const Navbar = ({ onGetStarted }: NavbarProps) => {
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
             </svg>
           </div>
-          <span className="text-xl font-semibold text-foreground">Shielder</span>
+          <span className="text-xl font-semibold text-foreground">ClearSky</span>
         </div>
 
         {/* Nav Links */}

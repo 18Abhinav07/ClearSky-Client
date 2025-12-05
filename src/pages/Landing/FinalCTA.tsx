@@ -15,7 +15,7 @@ const FinalCTA = ({ onGetStarted }: FinalCTAProps) => {
               Ready to save more time and money?
             </h2>
             <p className="text-body text-muted-foreground max-w-md">
-              Join thousands of companies already using Shielder to automate their workflows and scale their operations effortlessly.
+              Join thousands of companies already using ClearSky to automate their workflows and scale their operations effortlessly.
             </p>
             <div className="flex flex-wrap gap-4">
               <Button variant="hero" size="lg" onClick={onGetStarted}>
