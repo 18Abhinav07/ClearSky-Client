@@ -24,12 +24,18 @@ export const useAuthStore = create<AuthState>()(
         });
       },
       clearAuth: () => {
+        // Clear state
         set({
           isAuthenticated: false,
           walletAddress: null,
           tokens: null,
           devices: [],
         });
+
+        // IMPORTANT: Explicitly clear from localStorage to prevent rehydration
+        // This fixes the "double logout" bug where persist middleware
+        // would restore the old state from localStorage
+        localStorage.removeItem("auth-storage");
       },
     }),
     {

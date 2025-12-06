@@ -5,6 +5,7 @@ import HeroSection from "./HeroSection";
 import LogoBar from "./LogoBar";
 import Navbar from "./Navbar";
 import Testimonials from "./Testinmonial";
+import SplineComponent from "@/components/ui/SplineComponent";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -17,6 +18,8 @@ const LandingPage = ({ onGetStarted }: LandingPageProps) => {
       <main>
         <HeroSection onGetStarted={onGetStarted} />
         <LogoBar />
+                <SplineComponent />
+
         <Testimonials />
         <Awards />
         <FinalCTA onGetStarted={onGetStarted} />

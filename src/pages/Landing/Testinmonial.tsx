@@ -1,8 +1,19 @@
 import { Button } from "@/components/ui/button";
+import Cloud from "@/components/ui/Cloud";
 
 const Testimonials = () => {
   return (
-    <section className="section-spacing bg-background">
+    <section className="section-spacing bg-background relative overflow-hidden">
+      <Cloud
+        className="animate-float"
+        style={{
+          width: '400px',
+          top: '5%',
+          right: '-15%',
+          opacity: 0.1,
+          animationDuration: '40s',
+        }}
+      />
       <div className="container-main">
         <div className="bg-card rounded-4xl overflow-hidden shadow-soft">
           <div className="grid lg:grid-cols-[1fr,0.4fr]">

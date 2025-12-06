@@ -53,6 +53,7 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        'soft-cyan': 'hsl(var(--soft-cyan))', // Added soft-cyan
       },
       borderRadius: {
         lg: "var(--radius)",

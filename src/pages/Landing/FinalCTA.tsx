@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import Cloud from "@/components/ui/Cloud";
 
 interface FinalCTAProps {
   onGetStarted: () => void;
@@ -6,7 +7,17 @@ interface FinalCTAProps {
 
 const FinalCTA = ({ onGetStarted }: FinalCTAProps) => {
   return (
-    <section className="section-spacing bg-background">
+    <section className="section-spacing bg-background relative overflow-hidden">
+      <Cloud
+        className="animate-float"
+        style={{
+          width: '500px',
+          bottom: '-20%',
+          left: '-10%',
+          opacity: 0.1,
+          animationDuration: '35s',
+        }}
+      />
       <div className="container-main">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left - Content */}

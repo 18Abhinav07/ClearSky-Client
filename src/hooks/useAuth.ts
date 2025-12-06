@@ -129,23 +129,50 @@ export function useAuth() {
   /**
    * Logout user and clear all auth data
    * Also disconnects CDP wallet properly
+   *
+   * Fixed: Ensures complete logout on first attempt by explicitly
+   * clearing all storage and preventing state rehydration
+   *
+   * Note: We clear our backend tokens BEFORE disconnecting CDP to avoid
+   * sending multiple refresh token sources to CDP's logout endpoint
    */
-  const logout = () => {
+  const logout = async () => {
     console.log("[Auth] Logging out...");
 
-    // Clear backend tokens
+    // Step 1: Clear backend tokens FIRST (before CDP disconnect)
+    // This prevents sending multiple refresh token sources to CDP
     clearTokens();
+    console.log("[Auth] ✅ Backend tokens cleared");
 
-    // Clear auth store
-    clearAuth();
-
-    // Clear device store
+    // Step 2: Clear device store
     clearDevices();
+    console.log("[Auth] ✅ Device store cleared");
 
-    // Disconnect CDP wallet using wagmi
-    disconnect();
+    // Step 3: Clear auth store (now also removes from localStorage)
+    clearAuth();
+    console.log("[Auth] ✅ Auth store cleared");
 
-    console.log("[Auth] ✅ Logout complete");
+    // Step 4: Force clear all auth-related data from localStorage
+    // Do this BEFORE CDP disconnect to ensure clean slate
+    try {
+      localStorage.removeItem("auth-storage");
+      localStorage.removeItem("device-storage");
+      console.log("[Auth] ✅ All localStorage auth data cleared");
+    } catch (error) {
+      console.warn("[Auth] Failed to clear localStorage:", error);
+    }
+
+    // Step 5: Disconnect CDP wallet using wagmi
+    // This will trigger CDP's logout endpoint, but only with CDP's own tokens
+    try {
+      disconnect();
+      console.log("[Auth] ✅ Wallet disconnected");
+    } catch (error) {
+      console.warn("[Auth] CDP disconnect warning (can be ignored):", error);
+      // Don't throw - logout should still succeed even if CDP disconnect fails
+    }
+
+    console.log("[Auth] ✅ Logout complete - user fully logged out");
   };
 
   return {

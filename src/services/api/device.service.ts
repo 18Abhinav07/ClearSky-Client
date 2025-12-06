@@ -1,27 +1,39 @@
 /**
  * Device Service
  *
- * Handles all device-related API calls following the E2E script pattern
+ * Handles all device-related API calls following the actual backend API spec
  * Now uses API client with automatic token refresh
  */
 
 import { apiGet, apiPost, apiDelete } from "./apiClient";
 
+/**
+ * Device object as returned by the backend API
+ * Based on actual API spec from /api/v1/device endpoints
+ */
 export interface Device {
   device_id: string;
-  sensor_meta: {
-    city: string;
-    station: string;
-    sensor_types: string[];
-  };
   status: string;
   registered_at: string;
+  sensor_meta: {
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+    city?: string;
+    city_id: string;
+    station?: string;
+    station_id: string;
+    sensor_types: string[]; // e.g., ["PM2.5", "PM10", "CO2"]
+  };
 }
 
+/**
+ * Response from GET /api/v1/device
+ */
 export interface DevicesResponse {
-  count: number;
-  limit_reached: boolean;
   devices: Device[];
+  device_count: number;
 }
 
 export interface ApiResponse<T = any> {
@@ -35,11 +47,9 @@ export interface ApiResponse<T = any> {
 
 /**
  * Get user's registered devices
- * This is the KEY API call for Smart Landing Page logic
  *
- * From E2E Step 8:
- * GET /devices
- * Returns: { count: N, limit_reached: bool, devices: [...] }
+ * GET /api/v1/device
+ * Returns: { devices: [...], device_count: N }
  *
  * ✨ Auto-refreshes token if expired
  */
@@ -62,8 +72,7 @@ export async function getUserDevices(): Promise<DevicesResponse> {
 /**
  * Register a new device
  *
- * From E2E Steps 5-7:
- * POST /devices/register
+ * POST /api/device/register
  * Body: { city_id, station_id, sensor_types: [] }
  *
  * ✨ Auto-refreshes token if expired
@@ -92,15 +101,23 @@ export async function registerDevice(deviceData: {
 /**
  * Delete a device
  *
- * From E2E Step 11:
- * DELETE /devices/:deviceId
+ * DELETE /api/v1/device/:device_id
  *
  * ✨ Auto-refreshes token if expired
  */
-export async function deleteDevice(deviceId: string): Promise<void> {
-  const response = await apiDelete(`/api/v1/devices/${deviceId}`);
+export async function deleteDevice(device_Id: string): Promise<void> {
+  const response = await apiDelete(`/api/v1/devices/${device_Id}`);
 
   if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error("Device not found or you are not authorized to delete it");
+    }
     throw new Error("Failed to delete device");
+  }
+
+  const result: ApiResponse = await response.json();
+
+  if (!result.success) {
+    throw new Error(result.error?.message || "Failed to delete device");
   }
 }
