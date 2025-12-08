@@ -1,11 +1,20 @@
 import { Button } from "@/components/ui/button";
 import Cloud from "@/components/ui/Cloud";
+import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface HeroSectionProps {
   onGetStarted: () => void;
 }
 
 const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const handleNavigateToRegisterDevice = () => {
+    // Implement navigation logic here
+    navigate("/register-device");
+
+  };
   return (
     <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-24 overflow-hidden min-h-[85vh]">
       <Cloud
@@ -71,13 +80,22 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
   {/* CLEAR SKY COMPONENT END */}
 
   <div className="flex flex-wrap gap-4 justify-center pt-10 mt-10 space-x-4">
-    <Button 
+    {!isAuthenticated &&<Button 
       className="bg-slate-900 text-white hover:bg-slate-800 px-8 py-6 text-base font-semibold rounded-xl shadow-lg shadow-sky-900/10 transition-all hover:scale-105" 
       size="lg"
       onClick={onGetStarted}
     >
       Register your device
-    </Button>
+    </Button>}
+    {isAuthenticated &&<Button 
+      className="bg-slate-900 text-white hover:bg-slate-800 px-8 py-6 text-base font-semibold rounded-xl shadow-lg shadow-sky-900/10 transition-all hover:scale-105" 
+      size="lg"
+      onClick={handleNavigateToRegisterDevice}
+    >
+      Register your device
+    </Button>}
+
+    
     <Button
       variant="outline"
       className="border-2 border-slate-200 text-slate-700 hover:border-sky-200 hover:bg-sky-50 px-8 py-6 text-base font-semibold rounded-xl transition-colors"

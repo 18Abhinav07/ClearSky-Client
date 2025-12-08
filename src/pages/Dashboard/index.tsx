@@ -154,6 +154,10 @@ export default function Dashboard() {
     }
   };
 
+  const handlenavigatetoregisterdevice = () => {
+    navigate(ROUTES.REGISTER_DEVICE);
+  };
+
   // ========================================================================
   // Action Handlers
   // ========================================================================
@@ -202,6 +206,9 @@ export default function Dashboard() {
       console.error("Failed to delete device:", error);
       showToast(error.message || "Failed to delete device", "error");
     }
+  };
+  const handlenavigatemarketplace = () => {
+    navigate(ROUTES.MARKETPLACE);
   };
 
   const handleLogout = () => {
@@ -263,6 +270,18 @@ export default function Dashboard() {
               <span className="text-xl font-bold text-black font-cairo">ClearSky</span>
             </div>
 
+              {/* User Profile Section */}
+            <div className="flex items-center gap-6">
+              {/* Stats */}
+              <div className="hidden md:flex items-center gap-6 text-sm">
+                <div className="flex flex-col items-end">
+                  <Button onClick={handlenavigatemarketplace}> Go to Marketplace</Button>
+                    </div>
+               
+              </div>
+              </div>
+           
+
             {/* User Profile Section */}
             <div className="flex items-center gap-6">
               {/* Stats */}
@@ -271,15 +290,9 @@ export default function Dashboard() {
                   <span className="text-gray-500 text-xs">Devices Owned</span>
                   <span className="font-bold text-gray-900 font-cairo">{devices.length}</span>
                 </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-gray-500 text-xs">Bought IPs</span>
-                  <span className="font-bold text-gray-900 font-cairo">API_ENDPOINT_NEEDED</span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-gray-500 text-xs">Created Derivatives</span>
-                  <span className="font-bold text-gray-900 font-cairo">API_ENDPOINT_NEEDED</span>
-                </div>
+               
               </div>
+              
 
               {/* Wallet Address */}
               <div className="hidden lg:flex flex-col items-end">
@@ -382,9 +395,20 @@ export default function Dashboard() {
                             Delete
                           </button>
                         </div>
+                        
                       </div>
+                      
                     );
                   })}
+                  <div  className="flexflex flex-col items-center">
+                <span className="text-xs text-gray-500">
+                  <Button onClick={handlenavigatetoregisterdevice} 
+                  variant="outline"
+                className="border-2 border-black text-black  px-6 font-semibold rounded-full h-10"
+              >Register more devices</Button>
+                </span>
+                
+              </div>
                 </div>
               )}
             </div>

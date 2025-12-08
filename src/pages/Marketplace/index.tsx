@@ -63,16 +63,11 @@ export default function Marketplace() {
             </div>
 
             {/* Nav Links */}
-            <div className="hidden md:flex items-center gap-8">
+            <div className="hidden md:flex items-center justify-center gap-8">
               <a href="/" className="text-sm font-medium text-gray-700 hover:text-black transition-colors">
                 Home
               </a>
-              <a href="/marketplace" className="text-sm font-medium text-black border-b-2 border-sky-500">
-                Marketplace
-              </a>
-              <a href="/profile" className="text-sm font-medium text-gray-700 hover:text-black transition-colors">
-                Profile
-              </a>
+              
             </div>
 
             {/* User Info */}
@@ -225,6 +220,8 @@ export default function Marketplace() {
 function SearchBar({ onSearch }: { onSearch: (params: { type: string }) => void }) {
   const { isAuthenticated } = useAuth();
   const [type, setType] = useState<"DAILY" | "MONTHLY">("MONTHLY");
+  const [sensorType, setSensorType] = useState<string>("ALL");
+  const [city, setCity] = useState<string>("");
 
   const handleSearch = () => {
     if (!isAuthenticated) {
@@ -243,9 +240,9 @@ function SearchBar({ onSearch }: { onSearch: (params: { type: string }) => void 
 
   return (
     <div className="p-6 rounded-2xl bg-white/60 backdrop-blur-md border border-gray-200/80 shadow-sm">
-      <div className="flex flex-col md:flex-row items-center md:items-end gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         {/* Report Type Select */}
-        <div className="w-full md:w-1/3">
+        <div className="w-full">
           <label className="block text-sm font-semibold text-slate-700 mb-2">
             Report Type
           </label>
@@ -254,17 +251,51 @@ function SearchBar({ onSearch }: { onSearch: (params: { type: string }) => void 
             onChange={(e) => setType(e.target.value as "DAILY" | "MONTHLY")}
             className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
           >
-            <option value="DAILY">📅 Daily Air Quality Reports</option>
-            <option value="MONTHLY">📊 Monthly Air Quality Reports</option>
+            <option value="DAILY">📅 Daily Reports</option>
+            <option value="MONTHLY">📊 Monthly Reports</option>
           </select>
         </div>
 
+        {/* Sensor Type Select */}
+        <div className="w-full">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            Sensor Type
+          </label>
+          <select
+            value={sensorType}
+            onChange={(e) => setSensorType(e.target.value)}
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
+          >
+            <option value="ALL">All Sensors</option>
+            <option value="PM2.5">🌫️ PM2.5 (Fine Particles)</option>
+            <option value="PM10">💨 PM10 (Coarse Particles)</option>
+            <option value="CO2">🏭 CO2 (Carbon Dioxide)</option>
+            <option value="NO2">🚗 NO2 (Nitrogen Dioxide)</option>
+            <option value="O3">☀️ O3 (Ozone)</option>
+            <option value="SO2">🏭 SO2 (Sulfur Dioxide)</option>
+          </select>
+        </div>
+
+        {/* City Input */}
+        <div className="w-full">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            City (Optional)
+          </label>
+          <input
+            type="text"
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+            placeholder="e.g., Mumbai, Delhi..."
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
+          />
+        </div>
+
         {/* Search Button */}
-        <div className="w-full md:w-auto">
+        <div className="w-full flex items-end">
           <Button
             onClick={handleSearch}
             disabled={!isAuthenticated}
-            className="w-full md:w-auto px-8 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all h-full flex items-center justify-center shadow-md"
+            className="w-full px-8 py-3 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-all h-[52px] flex items-center justify-center shadow-md"
           >
             <svg className="w-5 h-5 mr-2 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -273,8 +304,13 @@ function SearchBar({ onSearch }: { onSearch: (params: { type: string }) => void 
           </Button>
         </div>
       </div>
-      <p className="text-xs text-slate-500 mt-3">
-        💡 Filtering by sensor type (PM2.5, PM10, CO2, NO2) and city is under development.
+      <p className="text-xs text-slate-500 mt-4 flex items-center gap-2">
+        <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+        <span>
+          <strong>Note:</strong> Sensor type and city filters are client-side only. Backend filtering support coming soon.
+        </span>
       </p>
     </div>
   );

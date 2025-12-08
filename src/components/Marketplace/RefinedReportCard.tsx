@@ -28,50 +28,72 @@ export function RefinedReportCard({
   const [isPurchasing, setIsPurchasing] = useState(false);
 
   const handleBuyLicense = async () => {
-    if (!storyClient) {
+    if (!address) {
       toast.error("Please connect your wallet first");
       return;
     }
 
-    if (!address) {
-      toast.error("Wallet not connected");
-      return;
-    }
-
-    // Check if derivative has been minted as IP Asset by backend
-    if (!report.ip_id || !report.licenseTermsId) {
-      toast.error("This derivative hasn't been registered as an IP Asset yet");
+    // Check if already sold
+    if (report.is_minted) {
+      toast.error("This derivative has already been sold");
       return;
     }
 
     setIsPurchasing(true);
 
     try {
-      console.log("[RefinedReportCard] Minting license...", {
-        ipId: report.ip_id,
-        licenseTermsId: report.licenseTermsId,
-        priceWIP: report.price_wip
+      console.log("[RefinedReportCard] Purchasing derivative NFT...", {
+        derivativeId: report.derivative_id,
+        buyerWallet: address
       });
 
-      // REAL BLOCKCHAIN CALL - Mint License Token via Story SDK
-      const result = await storyClient.buyLicense({
-        ipId: report.ip_id as Address,
-        licenseTermsId: report.licenseTermsId!,
-        priceWIP: report.price_wip || "100"
-      });
+      // Step 1: Backend mints NFT and transfers to buyer
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/api/v1/marketplace/purchase/${report.derivative_id}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ buyerWallet: address })
+        }
+      );
 
-      console.log("[RefinedReportCard] ✅ License minted!", result);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Purchase failed");
+      }
+
+      const result = await response.json();
+
+      console.log("[RefinedReportCard] ✅ NFT purchased and transferred!", result);
+
+      // Step 2: OPTIONAL - Mint license for derivative creation rights
+      if (storyClient && result.data.ip_id) {
+        console.log("[RefinedReportCard] Minting license for derivative rights...");
+
+        try {
+          await storyClient.buyLicense({
+            ipId: result.data.ip_id as Address,
+            licenseTermsId: "5",
+            priceWIP: "0"
+          });
+          console.log("[RefinedReportCard] ✅ License minted!");
+        } catch (licenseError) {
+          console.warn("[RefinedReportCard] License minting failed (non-critical):", licenseError);
+        }
+      }
 
       toast.success(
-        `License purchased! Token ID: ${result.licenseTokenId}. Check your profile.`
+        `Purchase successful! Check your profile to view and download.`
       );
 
       onPurchaseSuccess?.();
 
     } catch (error: any) {
-      console.error("[RefinedReportCard] License mint failed:", error);
+      console.error("[RefinedReportCard] Purchase failed:", error);
       toast.error(
-        `Failed to mint license: ${error.message || "Unknown error"}`
+        `Failed to purchase: ${error.message || "Unknown error"}`
       );
     } finally {
       setIsPurchasing(false);
@@ -129,12 +151,12 @@ export function RefinedReportCard({
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-bold text-slate-900">
-                {report.price_wip}
+                {report.price_wip || "100"}
               </span>
               <span className="text-slate-600 font-semibold">WIP</span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
-              License fee + 10% royalties to creator
+              Includes 10% platform fee + 5% creator royalty
             </p>
           </div>
 
@@ -150,7 +172,7 @@ export function RefinedReportCard({
         {/* Action Button */}
         <Button
           onClick={handleBuyLicense}
-          disabled={isPurchasing || !storyClient || !report.ip_id}
+          disabled={isPurchasing || !address || report.is_minted}
           className="w-full bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-sky-200 hover:shadow-sky-300"
         >
           {isPurchasing ? (
@@ -174,18 +196,18 @@ export function RefinedReportCard({
                   d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                 />
               </svg>
-              Minting License...
+              Processing Purchase...
             </span>
-          ) : !report.ip_id ? (
-            "Not Available Yet"
-          ) : !storyClient ? (
-            "Connect Wallet"
+          ) : report.is_minted ? (
+            "Sold Out"
+          ) : !address ? (
+            "Connect Wallet to Buy"
           ) : (
             <span className="flex items-center justify-center gap-2">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              Mint License
+              Buy for {report.price_wip || "100"} WIP
             </span>
           )}
         </Button>

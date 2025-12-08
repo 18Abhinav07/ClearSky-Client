@@ -10,6 +10,7 @@
  */
 
 import { useState } from "react";
+import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useStoryClient } from "../../hooks/useStoryClient";
 import { getTokenBalance } from "../../services/api/user-assets.service";
@@ -174,134 +175,140 @@ export function TokenWithdraw() {
         </Button>
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="relative w-full max-w-2xl bg-white border-2 border-gray-200 rounded-2xl shadow-2xl">
-            {/* Close Button */}
-            <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 transition-colors"
-            >
-              <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+      {/* Modal - Rendered at document.body level using React Portal */}
+      {showModal && createPortal(
+  <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black/50 backdrop-blur-sm">
+    {/* Flex container to handle positioning and scrolling */}
+    <div className="flex min-h-full items-start justify-center p-4 text-center">
 
-            <div className="p-8">
-              {/* Header */}
-              <div className="mb-8">
-                <h2 className="text-2xl font-bold text-slate-900 font-cairo mb-2">
-                  Manage Tokens
-                </h2>
-                <p className="text-slate-600 text-sm">
-                  Wrap/unwrap IP and WIP tokens
-                </p>
+      {/* Modal Content */}
+      <div className="relative w-full max-w-2xl mt-10 mb-10 bg-white border-2 border-gray-200 rounded-2xl shadow-2xl text-left">
+        {/* Close Button */}
+        <button
+          onClick={() => setShowModal(false)}
+          className="absolute top-4 right-4 flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors z-10 bg-white/90 backdrop-blur-sm border border-gray-200 shadow-sm"
+        >
+          <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div className="p-8">
+          {/* Header */}
+          <div className="mb-8 pr-10"> {/* pr-10 prevents text from hitting the close button */}
+            <h2 className="text-2xl font-bold text-slate-900 font-cairo mb-2">
+              Manage Tokens
+            </h2>
+            <p className="text-slate-600 text-sm">
+              Wrap/unwrap IP and WIP tokens
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {/* Withdraw WIP (Unwrap) */}
+            <div className="p-6 bg-sky-50/50 border-2 border-sky-200 rounded-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">Withdraw WIP</h3>
+                <span className="text-sm text-slate-600">
+                  Balance: {balances?.wip || "0.00"} WIP
+                </span>
               </div>
 
-              <div className="space-y-6">
-                {/* Withdraw WIP (Unwrap) */}
-                <div className="p-6 bg-sky-50/50 border-2 border-sky-200 rounded-xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-slate-900">Withdraw WIP</h3>
-                    <span className="text-sm text-slate-600">
-                      Balance: {balances?.wip || "0.00"} WIP
+              <p className="text-sm text-slate-600 mb-4">
+                Convert WIP tokens back to IP tokens
+              </p>
+
+              <div className="space-y-3">
+                <input
+                  type="number"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  placeholder="Amount to withdraw"
+                  className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-slate-900 focus:border-sky-400 focus:ring-4 focus:ring-sky-100 outline-none transition-all"
+                />
+
+                <Button
+                  onClick={handleWithdraw}
+                  disabled={isWithdrawing || !withdrawAmount}
+                  className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all"
+                >
+                  {isWithdrawing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Withdrawing...
                     </span>
-                  </div>
+                  ) : (
+                    "Withdraw WIP → IP"
+                  )}
+                </Button>
+              </div>
+            </div>
 
-                  <p className="text-sm text-slate-600 mb-4">
-                    Convert WIP tokens back to IP tokens
-                  </p>
+            {/* Deposit IP (Wrap) */}
+            <div className="p-6 bg-purple-50/50 border-2 border-purple-200 rounded-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">Deposit IP</h3>
+                <span className="text-sm text-slate-600">
+                  Balance: {balances?.ip || "0.00"} IP
+                </span>
+              </div>
 
-                  <div className="space-y-3">
-                    <input
-                      type="number"
-                      value={withdrawAmount}
-                      onChange={(e) => setWithdrawAmount(e.target.value)}
-                      placeholder="Amount to withdraw"
-                      className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-slate-900 focus:border-sky-400 focus:ring-4 focus:ring-sky-100 outline-none transition-all"
-                    />
+              <p className="text-sm text-slate-600 mb-4">
+                Convert IP tokens to WIP tokens for marketplace transactions
+              </p>
 
-                    <Button
-                      onClick={handleWithdraw}
-                      disabled={isWithdrawing || !withdrawAmount}
-                      className="w-full bg-sky-500 hover:bg-sky-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all"
-                    >
-                      {isWithdrawing ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          Withdrawing...
-                        </span>
-                      ) : (
-                        "Withdraw WIP → IP"
-                      )}
-                    </Button>
-                  </div>
-                </div>
+              <div className="space-y-3">
+                <input
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="Amount to deposit"
+                  className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-slate-900 focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all"
+                />
 
-                {/* Deposit IP (Wrap) */}
-                <div className="p-6 bg-purple-50/50 border-2 border-purple-200 rounded-xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-slate-900">Deposit IP</h3>
-                    <span className="text-sm text-slate-600">
-                      Balance: {balances?.ip || "0.00"} IP
+                <Button
+                  onClick={handleDeposit}
+                  disabled={isDepositing || !depositAmount}
+                  className="w-full bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all"
+                >
+                  {isDepositing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Depositing...
                     </span>
-                  </div>
+                  ) : (
+                    "Deposit IP → WIP"
+                  )}
+                </Button>
+              </div>
+            </div>
 
-                  <p className="text-sm text-slate-600 mb-4">
-                    Convert IP tokens to WIP tokens for marketplace transactions
-                  </p>
-
-                  <div className="space-y-3">
-                    <input
-                      type="number"
-                      value={depositAmount}
-                      onChange={(e) => setDepositAmount(e.target.value)}
-                      placeholder="Amount to deposit"
-                      className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl text-slate-900 focus:border-purple-400 focus:ring-4 focus:ring-purple-100 outline-none transition-all"
-                    />
-
-                    <Button
-                      onClick={handleDeposit}
-                      disabled={isDepositing || !depositAmount}
-                      className="w-full bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all"
-                    >
-                      {isDepositing ? (
-                        <span className="flex items-center justify-center gap-2">
-                          <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                          </svg>
-                          Depositing...
-                        </span>
-                      ) : (
-                        "Deposit IP → WIP"
-                      )}
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Info */}
-                <div className="flex items-start gap-3 p-4 bg-sky-50 border-2 border-sky-200 rounded-lg">
-                  <svg className="w-5 h-5 text-sky-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                  <div className="text-sm text-sky-700">
-                    <p className="font-semibold mb-1">About WIP and IP Tokens</p>
-                    <p className="text-xs opacity-90">
-                      WIP (Wrapped IP) is used for marketplace transactions and license fees.
-                      You can freely convert between IP and WIP tokens at a 1:1 ratio.
-                    </p>
-                  </div>
-                </div>
+            {/* Info */}
+            <div className="flex items-start gap-3 p-4 bg-sky-50 border-2 border-sky-200 rounded-lg">
+              <svg className="w-5 h-5 text-sky-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <div className="text-sm text-sky-700">
+                <p className="font-semibold mb-1">About WIP and IP Tokens</p>
+                <p className="text-xs opacity-90">
+                  WIP (Wrapped IP) is used for marketplace transactions and license fees.
+                  You can freely convert between IP and WIP tokens at a 1:1 ratio.
+                </p>
               </div>
             </div>
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  </div>,
+  document.body
+)}
     </>
   );
 }

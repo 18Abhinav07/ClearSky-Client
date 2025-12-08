@@ -34,7 +34,7 @@ export default function Landing() {
           await completeDeviceRegistration();
           console.log("[Landing] ✅ Device registration complete!");
           // Redirect to register-device page to show SmartLandingView
-          navigate(ROUTES.REGISTER_DEVICE);
+          navigate(ROUTES.LANDING);
         } catch (err) {
           console.error("[Landing] Failed to complete device registration:", err);
           setHasTriggeredRegistration(false); // Allow retry
