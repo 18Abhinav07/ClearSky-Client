@@ -29,7 +29,58 @@ export function useAuth() {
   const { setDevices, clearDevices, setLoading: setDevicesLoading, setError: setDevicesError } = useDeviceStore();
 
   /**
-   * Complete device registration flow
+   * Simple login (for Marketplace - no device registration needed)
+   * Called AFTER CDP authentication is complete and wallet is available
+   *
+   * Process:
+   * 1. Send wallet address to backend via POST /auth/login
+   * 2. Backend returns tokens
+   * 3. Store tokens and update auth state
+   * 4. Set isAuthenticated = true
+   *
+   * Note: Does NOT fetch devices - used when user just needs to browse/purchase
+   */
+  const login = async () => {
+    if (!address || !isConnected) {
+      setError("Wallet not connected. Please complete CDP authentication first.");
+      return;
+    }
+
+    setIsRegistering(true);
+    setError(null);
+
+    try {
+      console.log("[Auth] Logging in with wallet:", address);
+
+      // STEP 1-2: Call backend to login/register with wallet address
+      const response = await loginWithWallet(address);
+
+      console.log("[Auth] Login successful!");
+      console.log("[Auth] Tokens received");
+
+      // STEP 3-4: Store tokens and update auth state
+      storeTokens(response.tokens);
+      setAuth({
+        ...response,
+        walletAddress: address,
+      });
+
+      console.log("[Auth] ✅ User authenticated successfully");
+
+      return response;
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Login failed";
+      setError(errorMessage);
+      console.error("[Auth] Login error:", err);
+      throw err;
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  /**
+   * Complete device registration flow (for Landing Page/Dashboard)
    * Called AFTER CDP authentication is complete and wallet is available
    *
    * Enhanced Process (Following Sequence Diagram):
@@ -185,8 +236,9 @@ export function useAuth() {
     tokens,
     devices,
 
-    // Device Registration
-    completeDeviceRegistration,
+    // Authentication Methods
+    login, // Simple login (for Marketplace - no device fetch)
+    completeDeviceRegistration, // Full login with device fetch (for Landing/Dashboard)
     isRegistering,
 
     // Error Handling

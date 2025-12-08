@@ -16,10 +16,39 @@ import { type SearchRequest } from "../../services/api/marketplace.service";
 import { RefinedReportsGrid } from "./RefinedReportsGrid";
 import { DerivativesGallery } from "./DerivativesGallery";
 import Cloud from "../../components/ui/Cloud";
+import { AuthModal } from "../../components/Auth/AuthModal";
+import { ROUTES } from "@/config/routes";
+import { useNavigate } from "react-router-dom";
 
-export default function Marketplace() {
-  const { isAuthenticated, address } = useAuth();
+interface MarketplaceProps {
+  // Props can be added here if needed in the future
+}
+
+export default function Marketplace({}: MarketplaceProps) {
+  const { isAuthenticated, address, isConnected, login } = useAuth();
   const [searchParams, setSearchParams] = useState<{ type: string } | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    setIsAuthModalOpen(true);
+  };
+
+  const handleAuthSuccess = async () => {
+    console.log("[Marketplace] CDP authentication successful");
+
+    try {
+      // Simple login - just authenticate, no device registration needed
+      await login();
+      console.log("[Marketplace] ✅ User authenticated successfully");
+
+      // Close modal after successful login
+      setIsAuthModalOpen(false);
+    } catch (error) {
+      console.error("[Marketplace] Failed to login:", error);
+      // Keep modal open on error
+    }
+  };
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
@@ -62,30 +91,41 @@ export default function Marketplace() {
               <span className="text-xl font-bold text-black">ClearSky</span>
             </div>
 
-            {/* Nav Links */}
-            <div className="hidden md:flex items-center justify-center gap-8">
+            {/* Home Link (CENTER) */}
+            <div className="flex-1 flex items-center justify-center">
               <a href="/" className="text-sm font-medium text-gray-700 hover:text-black transition-colors">
                 Home
               </a>
-              
             </div>
 
-            {/* User Info */}
-            {isAuthenticated && address && (
-              <div className="flex items-center gap-3">
-                <div className="hidden sm:block px-4 py-2 bg-sky-50 border border-sky-200 rounded-full">
-                  <p className="text-xs font-medium text-sky-700 font-mono">
-                    {address.slice(0, 6)}...{address.slice(-4)}
-                  </p>
-                </div>
+            {/* RIGHT: Connect OR Profile (Single Conditional) */}
+            <div className="flex items-center gap-3">
+              {!isAuthenticated ? (
+                // Show Connect button when not authenticated
                 <Button
-                  className="bg-black text-white hover:bg-slate-800 px-6 font-semibold rounded-full h-11 shadow-sm"
-                  onClick={() => window.location.href = '/profile'}
+                  variant="outline"
+                  className="border-2 border-black text-black px-6 font-semibold rounded-full h-11"
+                  onClick={handleGetStarted}
                 >
-                  My Profile
+                  Connect
                 </Button>
-              </div>
-            )}
+              ) : (
+                // Show Profile info when authenticated
+                <>
+                  <div className="hidden sm:block px-4 py-2 bg-sky-50 border border-sky-200 rounded-full">
+                    <p className="text-xs font-medium text-sky-700 font-mono">
+                      {address?.slice(0, 6)}...{address?.slice(-4)}
+                    </p>
+                  </div>
+                  <Button
+                    className="bg-black text-white hover:bg-slate-800 px-6 font-semibold rounded-full h-11 shadow-sm"
+                    onClick={() => window.location.href = '/profile'}
+                  >
+                    My Profile
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </nav>
@@ -209,6 +249,13 @@ export default function Marketplace() {
           animation: fade-in-up 0.6s ease-out;
         }
       `}</style>
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 }
