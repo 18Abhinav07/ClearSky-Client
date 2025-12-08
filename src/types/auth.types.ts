@@ -1,21 +1,16 @@
-/**
- * Authentication Types for CDP + Wagmi Integration
- *
- * These types support the two-step authentication flow:
- * 1. CDP Email Authentication (OTP)
- * 2. Message Signing for device registration
- */
 
-export interface DeviceInfo {
-  deviceId: string;
-  deviceName: string;
-  userAgent: string;
-}
+import type { Device } from "../services/api/device.service";
 
 export interface AuthChallenge {
   challenge: string;
   nonce: string;
   expiresAt: string;
+}
+
+export interface DeviceInfo {
+  deviceId: string;
+  deviceName: string;
+  userAgent: string;
 }
 
 export interface DeviceRegistrationRequest {
@@ -25,21 +20,18 @@ export interface DeviceRegistrationRequest {
   deviceInfo: DeviceInfo;
 }
 
-export interface Device {
-  deviceId: string;
-  deviceName: string;
-  registeredAt: string;
-  lastUsed?: string;
-}
-
 export interface AuthTokens {
   access_token: string;
   refresh_token: string;
 }
 
-export interface DeviceRegistrationResponse {
+export interface DevicesResponse {
   devices: Device[];
-  limited: boolean;
+  count: number;
+  limit_reached: boolean;
+}
+
+export interface DeviceRegistrationResponse extends DevicesResponse {
   tokens: AuthTokens;
 }
 

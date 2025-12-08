@@ -9,6 +9,8 @@ import { ROUTES } from "../../config/routes";
 import Landing from "../../pages/Landing";
 import Dashboard from "../../pages/Dashboard";
 import RegisterDevice from "../../pages/RegisterDevice";
+import Marketplace from "@/pages/Marketplace";
+import UserProfile from "@/pages/UserProfile";
 
 export function AppRouter() {
   return (
@@ -17,6 +19,8 @@ export function AppRouter() {
         <Route path={ROUTES.LANDING} element={<Landing />} />
         <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
         <Route path={ROUTES.REGISTER_DEVICE} element={<RegisterDevice />} />
+        <Route path="/marketplace" element={<Marketplace />} />
+<Route path="/profile" element={<UserProfile />} />
         <Route path="*" element={<Navigate to={ROUTES.LANDING} replace />} />
       </Routes>
     </BrowserRouter>

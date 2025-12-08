@@ -33,7 +33,8 @@ export interface Device {
  */
 export interface DevicesResponse {
   devices: Device[];
-  device_count: number;
+  count: number;
+  limit_reached: boolean;
 }
 
 export interface ApiResponse<T = any> {
