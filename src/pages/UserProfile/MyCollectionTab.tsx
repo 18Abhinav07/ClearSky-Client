@@ -75,14 +75,25 @@ export function MyCollectionTab() {
 
         {/* Licenses Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {purchases.map((license) => (
-            <LicenseCard
-              key={license.licenseTokenId}
-              license={license}
-              onCreateDerivative={() => setSelectedForDerivative(license)}
-              onDownloadSuccess={() => refetch()}
-            />
-          ))}
+          {purchases.map((asset) => {
+            const license: PurchasedLicense = {
+              licenseTokenId: asset.license_token_id,
+              ipId: asset.ip_id,
+              derivativeId: asset.derivative_id,
+              title: "", // This will be fetched later
+              description: "", // This will be fetched later
+              purchasedAt: asset.purchased_at,
+              canCreateDerivative: asset.can_create_derivatives,
+            };
+            return (
+              <LicenseCard
+                key={asset.asset_id}
+                license={license}
+                onCreateDerivative={() => setSelectedForDerivative(license)}
+                onDownloadSuccess={() => refetch()}
+              />
+            );
+          })}
         </div>
       </div>
 

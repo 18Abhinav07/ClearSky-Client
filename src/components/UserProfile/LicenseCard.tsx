@@ -6,10 +6,10 @@
  * - Create derivative option
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
-import { getDownloadUrl, type PurchasedLicense } from "../../services/api/user-assets.service";
+import { getDownloadUrl, getDerivativeDetails, type PurchasedLicense } from "../../services/api/user-assets.service";
 
 interface LicenseCardProps {
   license: PurchasedLicense;
@@ -23,7 +23,33 @@ export function LicenseCard({
   onDownloadSuccess
 }: LicenseCardProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [title, setTitle] = useState(license.title || "Loading...");
+  const [description, setDescription] = useState(license.description || "Loading...");
   const toast = useToast();
+
+  useEffect(() => {
+    async function fetchDetails() {
+      if ((!license.title || !license.description) && license.derivativeId) {
+        try {
+          const details = await getDerivativeDetails(license.derivativeId);
+          const titleMatch = details.content.match(/# 📜 (.*)/);
+          const newTitle = titleMatch ? titleMatch[1] : 'Untitled Derivative';
+          
+          const locationMatch = details.content.match(/\*\*Location\*\*: (.*)/);
+          const newDescription = locationMatch ? `Location: ${locationMatch[1]}` : 'Details available in download.';
+
+          setTitle(newTitle);
+          setDescription(newDescription);
+        } catch (error) {
+          console.error("Failed to fetch derivative details:", error);
+          setTitle("Derivative");
+          setDescription("Details unavailable");
+        }
+      }
+    }
+    fetchDetails();
+  }, [license.derivativeId, license.title, license.description]);
+
 
   const handleSecureDownload = async () => {
     setIsDownloading(true);
@@ -57,10 +83,10 @@ export function LicenseCard({
         {/* Header */}
         <div>
           <h3 className="text-lg font-bold text-white font-cairo line-clamp-2">
-            {license.title}
+            {title}
           </h3>
           <p className="text-sm text-slate-400 mt-2 line-clamp-2">
-            {license.description}
+            {description}
           </p>
         </div>
 

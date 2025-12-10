@@ -228,10 +228,7 @@ export async function getUserAssets(walletAddress: string): Promise<BackendAsset
 
   const response = await fetch(url, {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      // Note: JWT auth will be removed by backend engineer
-    }
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
