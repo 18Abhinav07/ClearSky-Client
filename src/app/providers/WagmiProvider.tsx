@@ -14,6 +14,27 @@ import { createCDPEmbeddedWalletConnector } from "@coinbase/cdp-wagmi";
 import type { Config } from "@coinbase/cdp-core";
 import { CDPReactProvider } from "@coinbase/cdp-react";
 import { env } from "../../config/env";
+import { STORY_TESTNET_CHAIN_ID, STORY_TESTNET_RPC } from "../../config/story-contracts";
+import { defineChain } from "viem";
+
+// Define Story Protocol Testnet chain
+const storyTestnet = defineChain({
+  id: STORY_TESTNET_CHAIN_ID,
+  name: 'Story Protocol Testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'IP',
+    symbol: 'IP',
+  },
+  rpcUrls: {
+    default: { http: [STORY_TESTNET_RPC] },
+    public: { http: [STORY_TESTNET_RPC] },
+  },
+  blockExplorers: {
+    default: { name: 'Story Explorer', url: 'https://testnet.storyscan.xyz' },
+  },
+  testnet: true,
+});
 
 // CDP Configuration
 // Valid properties: projectId, basePath, ethereum, solana, customAuth, useMock, debugging, disableAnalytics
@@ -31,10 +52,11 @@ const cdpConfig: Config = {
 const connector = createCDPEmbeddedWalletConnector({
   cdpConfig: cdpConfig,
   providerConfig: {
-    chains: [base, baseSepolia],
+    chains: [base, baseSepolia, storyTestnet],
     transports: {
       [base.id]: http(),
       [baseSepolia.id]: http(),
+      [storyTestnet.id]: http(STORY_TESTNET_RPC),
     },
   },
 });
@@ -42,10 +64,11 @@ const connector = createCDPEmbeddedWalletConnector({
 // Wagmi Configuration
 const wagmiConfig = createConfig({
   connectors: [connector],
-  chains: [base, baseSepolia],
+  chains: [base, baseSepolia, storyTestnet],
   transports: {
     [base.id]: http(),
     [baseSepolia.id]: http(),
+    [storyTestnet.id]: http(STORY_TESTNET_RPC),
   },
 });
 

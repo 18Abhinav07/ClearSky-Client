@@ -25,46 +25,21 @@ export function DerivativesGallery() {
     return <EmptyState />;
   }
 
-  return (
-    <div className="space-y-6 overflow-x-auto pb-4">
-      {/* Filter Bar */}
-      {uniqueParents.length > 1 && (
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-semibold text-slate-300">
-            Filter by parent:
-          </label>
-          <select
-            value={parentFilter}
-            onChange={(e) => setParentFilter(e.target.value)}
-            className="px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-          >
-            <option value="">All Derivatives</option>
-            {uniqueParents.map(parentId => (
-              <option key={parentId} value={parentId}>
-                {parentId.slice(0, 6)}...{parentId.slice(-4)}
-              </option>
-            ))}
-          </select>
-
-          <span className="text-sm text-slate-400">
-            {derivatives.length} derivative{derivatives.length !== 1 ? 's' : ''} found
-          </span>
+  
+    return (
+      <div className="space-y-6">
+        {/* Masonry Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {derivatives.map((derivative) => (
+            <DerivativeCard
+              key={derivative.user_derivative_id}
+              derivative={derivative}
+            />
+          ))}
         </div>
-      )}
-
-      {/* Horizontal Scroll Grid */}
-      <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
-        {derivatives.map((derivative) => (
-          <div key={derivative.childIpId} className="flex-shrink-0 w-81 snap-start">
-        <DerivativeCard derivative={derivative} />
-          </div>
-        ))}
-        
       </div>
-    </div>
-  );
-}
-
+    );
+  }
 function LoadingSkeleton() {
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

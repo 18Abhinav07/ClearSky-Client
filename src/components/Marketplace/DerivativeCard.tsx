@@ -6,12 +6,10 @@
  */
 
 import { useState } from "react";
-import { type Address } from "viem";
-import { useStoryClient } from "../../hooks/useStoryClient";
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
-import { type DerivativeAsset } from "../../services/api/marketplace.service";
+import { purchaseCommunityDerivative, type DerivativeAsset } from "../../services/api/marketplace.service";
 
 interface DerivativeCardProps {
   derivative: DerivativeAsset;
@@ -22,32 +20,20 @@ export function DerivativeCard({
   derivative,
   onPurchaseSuccess
 }: DerivativeCardProps) {
-  const storyClient = useStoryClient();
   const { address } = useAuth();
   const toast = useToast();
   const [isPurchasing, setIsPurchasing] = useState(false);
 
   const handleBuyLicense = async () => {
-    if (!storyClient) {
-      toast.error("Please connect your wallet first");
-      return;
-    }
-
     if (!address) {
-      toast.error("Wallet not connected");
+      toast.error("Please connect your wallet first");
       return;
     }
 
     setIsPurchasing(true);
 
     try {
-      // REAL BLOCKCHAIN CALL - Mint License from Child IP
-      const result = await storyClient.buyLicense({
-        ipId: derivative.child_ip_id as Address, // Use child_ip_id
-        licenseTermsId: derivative.license_terms_id, // Use license_terms_id
-        priceWIP: derivative.price.toString() // Use price
-      });
-
+      await purchaseCommunityDerivative(derivative.user_derivative_id, address);
       toast.success("License purchased from derivative!");
       onPurchaseSuccess?.();
 
@@ -148,7 +134,7 @@ export function DerivativeCard({
         {/* Action Button */}
         <Button
           onClick={handleBuyLicense}
-          disabled={isPurchasing || !storyClient}
+          disabled={isPurchasing || !address}
           className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-semibold py-3 rounded-xl transition-all shadow-lg shadow-purple-200 hover:shadow-purple-300"
         >
           {isPurchasing ? (
@@ -159,7 +145,7 @@ export function DerivativeCard({
               </svg>
               Purchasing...
             </span>
-          ) : !storyClient ? (
+          ) : !address ? (
             "Connect Wallet"
           ) : (
             "Mint License"

@@ -230,6 +230,7 @@ const ENDPOINTS = {
   DERIVATIVES: `${env.API_BASE_URL}/api/v1/marketplace/derivatives`,
   CREATE_DERIVATIVE: `${env.API_BASE_URL}/api/v1/marketplace/derivatives/create`,
   COMMUNITY_DERIVATIVES: `${env.API_BASE_URL}/api/v1/marketplace/derivatives/community`,
+  PURCHASE_COMMUNITY_DERIVATIVE: (userDerivativeId: string) => `${env.API_BASE_URL}/api/v1/marketplace/derivatives/purchase/${userDerivativeId}`,
 } as const;
 
 export interface CreateDerivativeRequest {
@@ -247,6 +248,29 @@ export interface CreateDerivativeRequest {
 // ============================================================================
 // API FUNCTIONS
 // ============================================================================
+
+export async function purchaseCommunityDerivative(userDerivativeId: string, buyerWallet: string) {
+  const tokens = getStoredTokens();
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (tokens?.access_token) {
+    headers["Authorization"] = `Bearer ${tokens.access_token}`;
+  }
+
+  const response = await fetch(ENDPOINTS.PURCHASE_COMMUNITY_DERIVATIVE(userDerivativeId), {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ buyerWallet }),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json();
+    throw new Error(errorBody.message || "Failed to purchase community derivative");
+  }
+
+  return response.json();
+}
 
 export async function createUserDerivative(data: CreateDerivativeRequest) {
   const tokens = getStoredTokens();
