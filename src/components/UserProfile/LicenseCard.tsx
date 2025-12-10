@@ -9,7 +9,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
-import { getDownloadUrl, getDerivativeDetails, type PurchasedLicense } from "../../services/api/user-assets.service";
+import { downloadDerivative, getDerivativeDetails, type PurchasedLicense } from "../../services/api/user-assets.service";
 
 interface LicenseCardProps {
   license: PurchasedLicense;
@@ -54,14 +54,23 @@ export function LicenseCard({
   const handleSecureDownload = async () => {
     setIsDownloading(true);
     try {
-      // Step 1: Call the new service function with the derivative ID
-      console.log(`[LicenseCard] Getting download URL for derivative: ${license.derivativeId}`);
-      const { downloadUrl } = await getDownloadUrl(license.derivativeId);
+      console.log(`[LicenseCard] Downloading content for derivative: ${license.derivativeId}`);
+      const { content } = await downloadDerivative(license.derivativeId);
 
-      console.log("[LicenseCard] ✅ Access verified, downloading...");
+      // Create a blob from the markdown content
+      const blob = new Blob([content], { type: 'text/markdown' });
 
-      // Step 2: Open presigned URL
-      window.open(downloadUrl, "_blank");
+      // Create a temporary link to trigger the download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${license.derivativeId}.md`; // Set a filename
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
       toast.success("Download started successfully!");
       onDownloadSuccess?.();
@@ -73,7 +82,7 @@ export function LicenseCard({
       setIsDownloading(false);
     }
   };
-
+  
   return (
     <div className="group relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10">
       {/* Gradient overlay */}

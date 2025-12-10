@@ -186,7 +186,7 @@ export async function getDerivativeDetails(derivativeId: string) {
 
   const response = await fetch(url, {
     method: "GET",
-    headers: { "Content-Type": "application/json" }
+    headers: getAuthHeaders()
   });
 
   if (!response.ok) {
