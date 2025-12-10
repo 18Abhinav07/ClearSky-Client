@@ -25,12 +25,37 @@ export interface SensorData {
 export interface AqiReading {
   reading_id: string;
   device_id: string;
-  timestamp: number; // Unix seconds
+  timestamp?: number; // Unix seconds (deprecated, use meta.last_ingestion)
   sensor_data: SensorData;
-  status: "Pending" | "Verified" | "Failed";
+  status: "Pending" | "Verified" | "Failed" | "Derived" | "PENDING" | "VERIFIED" | "FAILED" | "DERIVED_INDIVIDUAL" | "COMPLETE";
   created_at: string; // ISO timestamp
   verified_at?: string; // ISO timestamp
   ipfs_cid?: string; // IPFS content identifier if verified
+  meta?: {
+    location?: {
+      coordinates?: {
+        latitude: number;
+        longitude: number;
+      };
+      city?: string;
+      city_id?: string;
+      station?: string;
+      station_id?: string;
+    };
+    ingestion_count?: number;
+    last_ingestion: string; // ISO timestamp
+    data_points_count?: Record<string, number>;
+  };
+  processing?: {
+    picked_at?: string;
+    picked_by?: string;
+    merkle_root?: string;
+    content_hash?: string;
+    ipfs_uri?: string;
+    ipfs_hash?: string;
+    verified_at?: string;
+    retry_count?: number;
+  };
 }
 
 /**
@@ -116,7 +141,7 @@ export async function ingestData(payload: IngestDataPayload): Promise<AqiReading
 /**
  * 2. Get Device Readings
  *
- * GET /api/v1/device/:device_id/readings
+ * GET /api/v1/readings/:device_id
  *
  * Retrieves recent readings for a specific device
  * Called when:
@@ -133,7 +158,7 @@ export async function getDeviceReadings(
   device_Id: string,
   limit: number = 10
 ): Promise<DeviceReadingsResponse> {
-  const response = await apiGet(`/api/v1/devices/${device_Id}/readings?limit=${limit}`);
+  const response = await apiGet(`/api/v1/readings/${device_Id}?limit=${limit}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch device readings");
@@ -155,17 +180,53 @@ export async function getDeviceReadings(
  *
  * Retrieves readings filtered by verification status
  * Used for status filter tabs (e.g., showing only 'Pending' vs 'Verified')
+ * For "Derived" status, fetches both COMPLETE and DERIVED_INDIVIDUAL and combines them
  *
- * @param status - Filter by status: "Pending" | "Verified" | "Failed"
+ * @param status - Filter by status: "Pending" | "Verified" | "Failed" | "Derived"
  * @param limit - Maximum number of readings to return (default: 20)
  * @returns Readings matching the status filter
  *
  * ✨ Auto-refreshes token if expired
  */
 export async function getReadingsByStatus(
-  status: "Pending" | "Verified" | "Failed",
+  status: "Pending" | "Verified" | "Failed" | "Derived",
   limit: number = 20
 ): Promise<ReadingsByStatusResponse> {
+  // For Derived status, fetch both COMPLETE and DERIVED_INDIVIDUAL and combine them
+  if (status === "Derived") {
+    const [completeResponse, derivedIndividualResponse] = await Promise.all([
+      apiGet(`/api/v1/readings/status/COMPLETE?limit=${limit}`),
+      apiGet(`/api/v1/readings/status/DERIVED_INDIVIDUAL?limit=${limit}`)
+    ]);
+
+    if (!completeResponse.ok || !derivedIndividualResponse.ok) {
+      throw new Error("Failed to fetch derived readings");
+    }
+
+    const completeResult: ApiResponse<ReadingsByStatusResponse> = await completeResponse.json();
+    const derivedIndividualResult: ApiResponse<ReadingsByStatusResponse> = await derivedIndividualResponse.json();
+
+    // Combine both results
+    const combinedReadings = [
+      ...(completeResult.data?.readings || []),
+      ...(derivedIndividualResult.data?.readings || [])
+    ];
+
+    // Sort by last_ingestion or created_at, newest first
+    combinedReadings.sort((a, b) => {
+      const timeA = new Date(a.meta?.last_ingestion || a.created_at).getTime();
+      const timeB = new Date(b.meta?.last_ingestion || b.created_at).getTime();
+      return timeB - timeA;
+    });
+
+    return {
+      status: "Derived",
+      total_count: combinedReadings.length,
+      readings: combinedReadings.slice(0, limit)
+    };
+  }
+
+  // For other statuses, use the standard endpoint
   const response = await apiGet(`/api/v1/readings/status/${status}?limit=${limit}`);
 
   if (!response.ok) {
@@ -184,7 +245,7 @@ export async function getReadingsByStatus(
 /**
  * 4. Get Reading By ID
  *
- * GET /api/v1/readings/:reading_id
+ * GET /api/v1/reading/:reading_id
  *
  * Retrieves full details for a specific reading
  * Called when user clicks a row in the history table
@@ -196,7 +257,7 @@ export async function getReadingsByStatus(
  * ✨ Auto-refreshes token if expired
  */
 export async function getReadingById(readingId: string): Promise<AqiReading> {
-  const response = await apiGet(`/api/v1/readings/${readingId}`);
+  const response = await apiGet(`/api/v1/reading/${readingId}`);
 
   if (!response.ok) {
     throw new Error("Failed to fetch reading details");

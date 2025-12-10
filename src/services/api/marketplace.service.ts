@@ -164,6 +164,7 @@ export interface BrowseDerivativesRequest {
   is_minted?: boolean;
   limit?: number;
   offset?: number;
+  creator?: string;
 }
 
 // ... (keep existing type definitions for now)
