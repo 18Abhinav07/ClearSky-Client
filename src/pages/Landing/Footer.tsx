@@ -23,16 +23,10 @@ const Footer = () => {
               <span className="text-xl font-semibold">ClearSky</span>
             </div>
             <p className="text-primary-foreground/60 text-sm mb-4">
-              Automate your startup workflows and scale delivery.
-            </p>
+Turn raw sensor streams into verifiable, revenue-generating IP assets.            </p>
             <div className="flex gap-4">
-              <a href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
-                <Twitter className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
+              
+              <a href="https://github.com/18Abhinav07/ClearSky-Client" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors">
                 <Github className="w-5 h-5" />
               </a>
             </div>
@@ -60,7 +54,7 @@ const Footer = () => {
 
         <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-primary-foreground/60 text-sm">
-            © 2024 ClearSky. All rights reserved.
+            © 2025 ClearSky. All rights reserved.
           </p>
           <div className="flex gap-6">
             <a href="#" className="text-primary-foreground/60 hover:text-primary-foreground transition-colors text-sm">

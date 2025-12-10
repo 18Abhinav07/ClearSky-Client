@@ -8,7 +8,7 @@ const LogoBar = () => {
   ];
 
   return (
-    <section className="py-12 border-t border-border/50">
+    <section className="py-12 ">
       <div className="container-main">
         <p className="text-center text-muted-foreground text-sm mb-8">
           Backed by leading e-commerce investors and founders

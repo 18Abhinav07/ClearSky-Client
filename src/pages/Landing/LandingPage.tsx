@@ -1,11 +1,8 @@
-import Awards from "./Awards";
-import FinalCTA from "./FinalCTA";
+import { FeaturesSectionWithCardGradientDemo } from "./FeaturesSelection";
 import Footer from "./Footer";
 import HeroSection from "./HeroSection";
-import LogoBar from "./LogoBar";
 import Navbar from "./Navbar";
 import Testimonials from "./Testinmonial";
-import SplineComponent from "@/components/ui/SplineComponent";
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -17,12 +14,10 @@ const LandingPage = ({ onGetStarted }: LandingPageProps) => {
       <Navbar onGetStarted={onGetStarted} />
       <main>
         <HeroSection onGetStarted={onGetStarted} />
-        <LogoBar />
-                <SplineComponent />
+                       <FeaturesSectionWithCardGradientDemo/>
 
         <Testimonials />
-        <Awards />
-        <FinalCTA onGetStarted={onGetStarted} />
+
       </main>
       <Footer />
     </div>
