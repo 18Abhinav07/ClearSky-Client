@@ -1,5 +1,4 @@
-import { Button } from "@/components/ui/button";
-import Cloud from "@/components/ui/Cloud";
+
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import SplineComponent from "@/components/ui/SplineComponent";
@@ -18,30 +17,10 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
   };
   return (
     <section className="relative pt-32 pb-16 lg:pt-40 lg:pb-24 overflow-hidden min-h-[100vh]">
-      <Cloud
-        className="animate-float"
-        style={{
-          width: '300px',
-          top: '10%',
-          right: '-5%',
-          opacity: 0.8,
-          animationDuration: '25s',
-        }}
-      />
-      <Cloud
-        className="animate-float"
-        style={{
-          width: '200px',
-          top: '40%',
-          left: '-10%',
-          opacity: 0.6,
-          animationDuration: '30s',
-          animationDelay: '5s'
-        }}
-      />
+     
 
       {/* Background image with fade effect */}
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <img
           src="/herobg.jpg"
           alt="Background"
@@ -51,13 +30,13 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/40 via-70% to-sky-200" />
       </div>
       
-     <div className="container-main mx-auto flex justify-center items-center relative mt-6 z-10">
+     <div className="container-main mx-auto flex justify-center items-center relative mt-6 z-20">
   <div className="flex flex-col gap-12 items-center mt-5 text-center">
     
     {/* Left Content */}
    <div className="space-y-8 animate-fade-in-up max-w-2xl text-center mx-auto">
   {/* CLEAR SKY COMPONENT START */}
-  <div className="space-y-6 mt-16">
+  <div className="space-y-4 mt-16">
     {/* Badge */}
    
     {/* Branded Headline */}
@@ -84,7 +63,7 @@ const HeroSection = ({ onGetStarted }: HeroSectionProps) => {
 </div>
 
       {/* Spline Component - Full width below text */}
-      <div className="absolute left-0 right-0 w-full h-[600px] z-0" style={{ top: 'calc(50% + 100px)' }}>
+      <div className="absolute left-0 right-0 w-full h-[900px] z-10" style={{ top: 'calc(40% + 50px)' }}>
         <SplineComponent/>
       </div>
 

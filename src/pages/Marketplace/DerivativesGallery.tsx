@@ -32,7 +32,7 @@ export function DerivativesGallery() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 overflow-x-auto pb-4">
       {/* Filter Bar */}
       {uniqueParents.length > 1 && (
         <div className="flex items-center gap-4">
@@ -58,14 +58,14 @@ export function DerivativesGallery() {
         </div>
       )}
 
-      {/* Masonry Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Horizontal Scroll Grid */}
+      <div className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900">
         {derivatives.map((derivative) => (
-          <DerivativeCard
-            key={derivative.childIpId}
-            derivative={derivative}
-          />
+          <div key={derivative.childIpId} className="flex-shrink-0 w-81 snap-start">
+        <DerivativeCard derivative={derivative} />
+          </div>
         ))}
+        
       </div>
     </div>
   );

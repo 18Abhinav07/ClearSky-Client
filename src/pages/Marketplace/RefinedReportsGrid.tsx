@@ -42,8 +42,8 @@ export function RefinedReportsGrid({ searchParams }: RefinedReportsGridProps) {
   // No reports found or an empty array was returned
   if (!reports || reports.length === 0) {
     return (
-      <div className="text-center py-16 border border-slate-700 border-dashed rounded-2xl bg-slate-900/30">
-        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
+      <div className="text-center py-16 border border-slate-700 border-dashed rounded-2xl bg-slate-900/30 overflow-y-auto max-h-[400px] ">
+        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center ">
           <svg className="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
@@ -59,16 +59,17 @@ export function RefinedReportsGrid({ searchParams }: RefinedReportsGridProps) {
   }
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div className="flex gap-8 overflow-x-auto max-h-[550px] pb-4">
       {reports.map((report) => (
-        <RefinedReportCard
-          key={report.derivative_id} // Use derivative_id as stable key
-          report={report}
-          onPurchaseSuccess={() => {
-            refetch();
-            // Optionally navigate to profile
-          }}
-        />
+        <div key={report.derivative_id} className="flex-shrink-0 w-100">
+          <RefinedReportCard
+            report={report}
+            onPurchaseSuccess={() => {
+              refetch();
+              // Optionally navigate to profile
+            }}
+          />
+        </div>
       ))}
     </div>
   );

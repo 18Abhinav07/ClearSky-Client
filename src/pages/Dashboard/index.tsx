@@ -12,11 +12,12 @@
  */
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { ROUTES } from "../../config/routes";
 import { Button } from "../../components/ui/button";
 import { Toast } from "../../components/ui/toast";
+import { LinkIcon } from "lucide-react";
 import {
   getDeviceReadings,
   getReadingsByStatus,
@@ -106,7 +107,7 @@ function DerivativesView() {
 
   return (
     <>
-      <div className="space-y-4">
+      <div className="space-y-4 overflow-y-auto max-h-[400px]">
         {derivatives.map((derivative) => (
           <DerivativeCard key={derivative.derivative_id} derivative={derivative} onClick={() => openModal(derivative)} />
         ))}
@@ -258,7 +259,7 @@ export default function Dashboard() {
     }
   };
 
-  const loadReadingsByStatus = async (status: "Pending" | "Verified" | "Failed" | "Derived") => {
+  const loadReadingsByStatus = async (status: "Pending" | "Verified"  | "Derived") => {
     setIsLoadingReadings(true);
     try {
       const response = await getReadingsByStatus(status, 20);
@@ -272,7 +273,7 @@ export default function Dashboard() {
   };
 
   const handlenavigatetoregisterdevice = () => {
-    navigate(ROUTES.REGISTER_DEVICE);
+    navigate(ROUTES.REGISTER_DEVICE, { state: { directToForm: true } });
   };
 
   // ========================================================================
@@ -356,19 +357,19 @@ export default function Dashboard() {
     
     // Handle VERIFIED status
     if (upperStatus === "VERIFIED") {
-      return "bg-green-500";
+      return "bg-green-100 ";
     }
     // Handle PENDING status
     if (upperStatus === "PENDING") {
-      return "bg-yellow-500";
+      return "bg-yellow-400";
     }
     // Handle FAILED status
     if (upperStatus === "FAILED") {
-      return "bg-red-500";
+      return "bg-red-400";
     }
     // Handle DERIVED statuses (DERIVED_INDIVIDUAL, COMPLETE)
     if (upperStatus === "DERIVED_INDIVIDUAL" || upperStatus === "COMPLETE" || upperStatus === "DERIVED") {
-      return "bg-blue-500";
+      return "bg-blue-400";
     }
     
     return "bg-gray-500";
@@ -394,6 +395,8 @@ export default function Dashboard() {
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
+                          <a href="/">
+
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
                 <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
@@ -402,20 +405,9 @@ export default function Dashboard() {
               </div>
               <span className="text-xl font-bold text-black font-cairo">ClearSky</span>
             </div>
+            </a>
 
               {/* User Profile Section */}
-            <div className="flex items-center gap-6">
-              {/* Stats */}
-              <div className="hidden md:flex items-center gap-6 text-sm">
-                <div className="flex flex-col items-end">
-                  <Button onClick={handlenavigatemarketplace}> Go to Marketplace</Button>
-                    </div>
-               
-              </div>
-              </div>
-           
-
-            {/* User Profile Section */}
             <div className="flex items-center gap-6">
               {/* Stats */}
               <div className="hidden md:flex items-center gap-6 text-sm">
@@ -431,15 +423,24 @@ export default function Dashboard() {
               <div className="hidden lg:flex flex-col items-end">
                 <span className="text-xs text-gray-500">Wallet</span>
                 <span className="text-sm font-mono text-gray-900">
-                  {address?.slice(0, 6)}...{address?.slice(-4)}
+                  {address?.slice(0, 2)}...{address?.slice(-2)}
                 </span>
               </div>
+
+              {/* Marketplace Button */}
+              <Button
+                onClick={handlenavigatemarketplace}
+                variant="outline"
+                className="border-2 border-black text-black-600  px-6 font-semibold rounded-full h-10"
+              >
+                Marketplace
+              </Button>
 
               {/* Disconnect Button */}
               <Button
                 onClick={handleLogout}
                 variant="outline"
-                className="border-2 border-black text-black hover:bg-gray-50 px-6 font-semibold rounded-full h-10"
+                className="border-2 border-black text-black  px-6 font-semibold rounded-full h-10"
               >
                 Disconnect
               </Button>
@@ -456,7 +457,14 @@ export default function Dashboard() {
             {/* Registered Devices Card */}
             <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-black font-cairo">My Devices</h2>
+                <h2 className="text-2xl font-bold text-black font-cairo">My Devices  <Button onClick={handlenavigatetoregisterdevice} 
+                      variant="outline"
+                      className="border-2 border-black text-black  px-6 font-semibold rounded-full h-10"
+                    >
+                      Register More Devices
+                    </Button></h2>
+               
+                   
                 <span className="text-sm text-gray-500">{devices.length} device(s) registered</span>
               </div>
 
@@ -517,28 +525,12 @@ export default function Dashboard() {
                               ID: {device.device_id.slice(0, 16)}...
                             </p>
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteDevice(device.device_id);
-                            }}
-                            className="px-3 py-1 text-xs text-red-600 hover:bg-red-50 rounded transition-colors"
-                            title="Delete device"
-                          >
-                            Delete
-                          </button>
+                          
                         </div>
                       </div>
                     );
                   })}
-                  <div className="flex flex-col items-center">
-                    <span className="text-xs text-gray-500">
-                      <Button onClick={handlenavigatetoregisterdevice} 
-                      variant="outline"
-                      className="border-2 border-black text-black px-6 font-semibold rounded-full h-10"
-                      >Register more devices</Button>
-                    </span>
-                  </div>
+                
                 </div>
               )}
             </div>
@@ -582,7 +574,7 @@ export default function Dashboard() {
                       <p className="mt-1 text-sm text-gray-500">{selectedDeviceId ? "This device hasn't recorded any data yet." : "Select a device to see its readings."}</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
+                    <div className="space-y-4 overflow-y-auto max-h-[400px]">
                       {readings.slice(0, 5).map((reading) => (
                         <button key={reading.reading_id} onClick={() => handleViewReadingDetails(reading.reading_id)} className="w-full text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors">
                           <div className="flex items-start justify-between mb-2">
@@ -609,13 +601,13 @@ export default function Dashboard() {
           </div>
 
           {/* ===== RIGHT COLUMN: Live History ===== */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm sticky top-24">
+          <div className="lg:col-span-1 ">
+            <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm sticky top-24 min-h-[100vh]">
               <h3 className="text-xl font-bold text-black mb-4 font-cairo">Live History</h3>
 
               {/* Status Filter Tabs */}
               <div className="flex gap-2 mb-4 overflow-x-auto">
-                {(["All", "Pending", "Verified", "Derived", "Failed"] as const).map((status) => (
+                {(["All", "Pending", "Verified", "Derived"] as const).map((status) => (
                   <button
                     key={status}
                     onClick={() => handleStatusFilterChange(status)}
@@ -649,18 +641,20 @@ export default function Dashboard() {
                       onClick={() => handleViewReadingDetails(reading.reading_id)}
                       className="w-full text-left p-3 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
                     >
-                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex items-start justify-between mb-2">
                         <span className="text-xs font-mono text-gray-500">
                           {reading.reading_id.slice(0, 12)}...
                         </span>
                         <span
-                          className={`text-xs px-2 py-0.5 rounded-full text-white ${getStatusBadgeColor(
-                            reading.status
-                          )}`}
+                          className={`text-xs px-2 py-0.5 rounded-full ${
+                          reading.status.toUpperCase() === "VERIFIED" 
+                            ? "bg-green-100 text-green-700" 
+                            : `text-white ${getStatusBadgeColor(reading.status)}`
+                          }`}
                         >
                           {reading.status === "DERIVED_INDIVIDUAL" || reading.status === "COMPLETE" ? "DERIVED" : reading.status}
                         </span>
-                      </div>
+                        </div>
                       <div className="text-xs text-gray-600">
                         {formatTimestamp(reading.meta?.last_ingestion || reading.timestamp)}
                       </div>
@@ -738,10 +732,10 @@ export default function Dashboard() {
               </div>
 
               {/* Verification Details - Only show if verified */}
-              {(readingModal.reading.status === "VERIFIED" || readingModal.reading.status === "Verified") && readingModal.reading.processing && (
-                <div className="bg-gradient-to-br from-green-50 to-emerald-50 border border-green-200 rounded-xl p-4 space-y-3">
+              {(readingModal.reading.status === "VERIFIED" || readingModal.reading.status === "Verified" || readingModal.reading.status === "DERIVED_INDIVIDUAL") && readingModal.reading.processing && (
+                <div className="bg-gradient-to-br from-black-30 to-black-90 border border-black-200 rounded-xl p-4 space-y-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                    <div className="w-2 h-2 bg-black rounded-full animate-pulse"></div>
                     <label className="text-sm font-semibold text-green-800 uppercase tracking-wide">Verification Details</label>
                   </div>
                   
@@ -763,9 +757,10 @@ export default function Dashboard() {
                         href={`https://ipfs.io/ipfs/${readingModal.reading.processing.ipfs_hash}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-mono text-blue-600 hover:text-blue-800 break-all bg-white px-2 py-1 rounded border border-blue-200 hover:border-blue-400 transition-colors inline-block w-full"
+                        className="text-xs font-mono text-black-600 hover:text-blue-800 break-all bg-white px-2 py-1 rounded border border-blue-200 hover:border-blue-400 transition-colors inline-block w-full"
                       >
                         {readingModal.reading.processing.ipfs_uri}
+                        <LinkIcon className="inline-block w-3 h-3 ml-1" />
                       </a>
                     </div>
                   )}

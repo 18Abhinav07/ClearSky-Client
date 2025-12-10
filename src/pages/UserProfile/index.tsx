@@ -13,6 +13,7 @@ import { MyDevicesTab } from "./MyDevicesTab";
 import { MyCollectionTab } from "./MyCollectionTab";
 import { MyCreationsTab } from "./MyCreationsTab";
 import { TokenWithdraw } from "../../components/UserProfile/TokenWithdraw";
+import BackgroundPaths from "@/components/ui/background-paths";
 
 type Tab = "devices" | "collection" | "creations";
 
@@ -37,6 +38,10 @@ export default function UserProfile() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
+     <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <BackgroundPaths />
+      </div>
+
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-6 py-6">

@@ -136,7 +136,7 @@ function DerivativesView() {
 
 function DerivativeCard({ derivative }: { derivative: RefinedReport }) {
     return (
-        <div className="p-6 bg-slate-800/50 border border-slate-700 rounded-2xl hover:border-blue-500/50 transition-all">
+        <div className="p-6 bg-white-20 border border-slate-700 rounded-2xl hover:border-blue-500/50 transition-all">
             <div className="flex items-start justify-between mb-4">
                 <div>
                     <h3 className="font-bold text-white text-lg">{derivative.title || "Untitled Derivative"}</h3>
@@ -168,11 +168,11 @@ function DerivativeCard({ derivative }: { derivative: RefinedReport }) {
 
 function DeviceCard({ device }: { device: Device }) {
   return (
-    <div className="p-6 bg-slate-800/50 border border-slate-700 rounded-2xl hover:border-blue-500/50 transition-all">
+    <div className="p-6 bg-white/20 border border-slate-700 rounded-2xl hover:border-blue-500/50 transition-all">
       <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="font-bold text-white text-lg">{device.device_id || "Unnamed Device"}</h3>
-          <p className="text-sm text-slate-400 mt-1">
+          <h3 className="font-bold text-black/70 text-lg">{device.device_id || "Unnamed Device"}</h3>
+          <p className="text-sm text-black/70 mt-1">
             {device.sensor_meta?.city || "Unknown Location"}
           </p>
         </div>
@@ -187,16 +187,16 @@ function DeviceCard({ device }: { device: Device }) {
 
       <div className="space-y-2 text-sm">
         <div className="flex justify-between">
-          <span className="text-slate-400">Device ID:</span>
-          <span className="font-mono text-slate-300">{device.device_id.slice(0, 8)}...</span>
+          <span className="text-black-400">Device ID:</span>
+          <span className="font-mono text-black-300">{device.device_id.slice(0, 8)}...</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-slate-400">Sensor Type:</span>
-          <span className="text-slate-300">{device.sensor_meta.sensor_types[0]}</span>
+          <span className="text-black-400">Sensor Type:</span>
+          <span className="text-black-300">{device.sensor_meta.sensor_types[0]}</span>
         </div>
         <div className="flex justify-between">
-          <span className="text-slate-400">Registered:</span>
-          <span className="text-slate-300">
+          <span className="text-black-400">Registered:</span>
+          <span className="text-black-300">
             {new Date(device.registered_at).toLocaleDateString()}
           </span>
         </div>

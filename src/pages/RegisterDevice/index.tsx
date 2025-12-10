@@ -5,16 +5,40 @@
  * Based on user navigation
  */
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { DeviceRegistrationForm } from "../../components/DeviceRegistration/DeviceRegistrationForm";
 import { SmartLandingView } from "../../components/SmartLanding/SmartLandingView";
 import { useAuth } from "../../hooks/useAuth";
 import { useEffect, useState } from "react";
+import { useDeviceStore } from "../../app/store/deviceStore";
+import { ROUTES } from "../../config/routes";
 
 export default function RegisterDevice() {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [showForm, setShowForm] = useState(false);
+  const location = useLocation();
+  const { count } = useDeviceStore();
+  
+  // Check if we should show form directly from location state or device count
+  const directToForm = location.state?.directToForm === true;
+  const hasDevices = count > 0;
+  
+  // Show form if explicitly requested OR if user has devices
+  const [showForm, setShowForm] = useState(directToForm || hasDevices);
+
+  // Update showForm when count changes (in case it loads after initial render)
+  useEffect(() => {
+    if (hasDevices && !showForm) {
+      setShowForm(true);
+    }
+  }, [hasDevices, showForm]);
+
+  // Also check for directToForm flag from location state
+  useEffect(() => {
+    if (directToForm) {
+      setShowForm(true);
+    }
+  }, [directToForm]);
 
   // Redirect to landing if not authenticated
   useEffect(() => {
@@ -22,6 +46,15 @@ export default function RegisterDevice() {
       navigate("/");
     }
   }, [isAuthenticated, navigate]);
+
+  // Handle back button - if came from dashboard, go back to dashboard
+  const handleBack = () => {
+    if (directToForm || hasDevices) {
+      navigate(ROUTES.DASHBOARD);
+    } else {
+      setShowForm(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -39,7 +72,7 @@ export default function RegisterDevice() {
         {/* Back Button */}
         <div className="container-main mb-6">
           <button
-            onClick={() => setShowForm(false)}
+            onClick={handleBack}
             className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
           >
             <svg
@@ -60,7 +93,7 @@ export default function RegisterDevice() {
         </div>
 
         {/* Registration Form */}
-        <DeviceRegistrationForm onBack={() => setShowForm(false)} />
+        <DeviceRegistrationForm onBack={handleBack} />
       </div>
     );
   }

@@ -156,6 +156,48 @@ const MOCK_DERIVATIVES: DerivativeAsset[] = [
     licenseTermsId: "5",
     price_wip: "30",
     createdAt: "2025-01-16T14:20:00Z"
+  },
+  {
+    childIpId: "0xdef1234567890abcdef1234567890abcdef12345",
+    parentIpId: "0x1234567890abcdef1234567890abcdef12345678",
+    creatorAddress: "0x5432109876fedcba5432109876fedcba54321098",
+    metadata: {
+      title: "Remix: Mumbai AQI Musical Composition",
+      description: "Audio composition where PM2.5 levels control musical notes and rhythm",
+      type: "remix",
+      thumbnailUrl: "https://clearsky-data.s3.amazonaws.com/derivatives/audio-viz-001.png"
+    },
+    licenseTermsId: "5",
+    price_wip: "30",
+    createdAt: "2025-01-16T14:20:00Z"
+  },
+  {
+    childIpId: "0xdef1234567890abcdef1234567890abcdef12345",
+    parentIpId: "0x1234567890abcdef1234567890abcdef12345678",
+    creatorAddress: "0x5432109876fedcba5432109876fedcba54321098",
+    metadata: {
+      title: "Remix: Mumbai AQI Musical Composition",
+      description: "Audio composition where PM2.5 levels control musical notes and rhythm",
+      type: "remix",
+      thumbnailUrl: "https://clearsky-data.s3.amazonaws.com/derivatives/audio-viz-001.png"
+    },
+    licenseTermsId: "5",
+    price_wip: "30",
+    createdAt: "2025-01-16T14:20:00Z"
+  },
+  {
+    childIpId: "0xdef1234567890abcdef1234567890abcdef12345",
+    parentIpId: "0x1234567890abcdef1234567890abcdef12345678",
+    creatorAddress: "0x5432109876fedcba5432109876fedcba54321098",
+    metadata: {
+      title: "Remix: Mumbai AQI Musical Composition",
+      description: "Audio composition where PM2.5 levels control musical notes and rhythm",
+      type: "remix",
+      thumbnailUrl: "https://clearsky-data.s3.amazonaws.com/derivatives/audio-viz-001.png"
+    },
+    licenseTermsId: "5",
+    price_wip: "30",
+    createdAt: "2025-01-16T14:20:00Z"
   }
 ];
 
