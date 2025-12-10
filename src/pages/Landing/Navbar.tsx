@@ -61,7 +61,7 @@ const Navbar = ({ onGetStarted }: NavbarProps) => {
                 </Button>
                 <Button
                   variant="outline"
-                  className="border-2 border-blue-600 text-blue-600 px-4 font-semibold rounded-full h-11"
+                  className="border-2 border-black text-black px-4 font-semibold rounded-full h-11"
                   onClick={() => navigate(ROUTES.REGISTER_DEVICE)}
                 >
                   Register Device
