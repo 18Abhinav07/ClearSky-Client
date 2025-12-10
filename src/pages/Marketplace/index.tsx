@@ -53,29 +53,7 @@ export default function Marketplace({}: MarketplaceProps) {
   return (
     <div className="min-h-screen bg-white text-slate-900">
       {/* Decorative Clouds */}
-      <Cloud
-        className="animate-float fixed"
-        style={{
-          width: '250px',
-          top: '15%',
-          right: '5%',
-          opacity: 0.4,
-          animationDuration: '25s',
-          zIndex: 0
-        }}
-      />
-      <Cloud
-        className="animate-float fixed"
-        style={{
-          width: '180px',
-          top: '60%',
-          left: '8%',
-          opacity: 0.3,
-          animationDuration: '30s',
-          animationDelay: '5s',
-          zIndex: 0
-        }}
-      />
+     
 
       {/* Fixed Navbar matching landing page */}
       <nav className="fixed top-6 left-0 right-0 z-50 px-6">
@@ -92,14 +70,15 @@ export default function Marketplace({}: MarketplaceProps) {
             </div>
 
             {/* Home Link (CENTER) */}
-            <div className="flex-1 flex items-center justify-center">
+           
+
+            {/* RIGHT: Connect OR Profile (Single Conditional) */}
+            <div className="flex items-center gap-3">
+               <div className="flex-1 flex items-center justify-center">
               <a href="/" className="text-sm font-medium text-gray-700 hover:text-black transition-colors">
                 Home
               </a>
             </div>
-
-            {/* RIGHT: Connect OR Profile (Single Conditional) */}
-            <div className="flex items-center gap-3">
               {!isAuthenticated ? (
                 // Show Connect button when not authenticated
                 <Button
