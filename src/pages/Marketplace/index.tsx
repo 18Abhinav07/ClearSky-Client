@@ -129,8 +129,7 @@ export default function Marketplace({}: MarketplaceProps) {
 
             {/* Subtitle */}
             <p className="text-lg text-slate-600 max-w-2xl font-normal leading-relaxed mx-auto">
-             Instantly access LLM-ready AQI Datastreams and explore community-built derivatives.
-              All data cryptographically signed by our DePIN network.
+             Instantly access LLM-ready AQI Datastreams and explore community-built derivatives. All data cryptographically signed by our DePIN network.
             </p>
 
           </div>
