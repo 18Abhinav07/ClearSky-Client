@@ -20,10 +20,9 @@ interface RefinedReportsGridProps {
 }
 
 export function RefinedReportsGrid({ searchParams }: RefinedReportsGridProps) {
-  // The backend supports filtering by 'type', so we pass that.
+  // The backend supports filtering by 'type', but we'll fetch all types
   // We also hardcode is_minted=false as per the backend E2E test.
   const queryParams = {
-    type: searchParams.type,
     is_minted: false,
   };
 

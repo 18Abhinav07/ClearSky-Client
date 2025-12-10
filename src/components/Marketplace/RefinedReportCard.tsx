@@ -25,7 +25,12 @@ export function RefinedReportCard({
   const { address } = useAuth();
   const storyClient = useStoryClient();
   const toast = useToast();
-  const [isPurchasing, setIsPurchasing] = useState(false);
+    const [isPurchasing, setIsPurchasing] = useState(false);
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
+  const [isRawDataModalOpen, setIsRawDataModalOpen] = useState(false);
+
+  const dateMatch = report.content.match(/# 📜 Daily Log: (.*)/);
+  const date = dateMatch ? dateMatch[1] : '';
 
   const handleBuyLicense = async () => {
     if (!address) {
@@ -120,11 +125,17 @@ export function RefinedReportCard({
       <div className="relative p-6 space-y-4">
         {/* Header */}
         <div>
-          <h3 className="text-xl font-bold text-slate-900 font-cairo line-clamp-2 group-hover:text-sky-600 transition-colors">
-            {report.title || `${report.type} Air Quality Report`}
-          </h3>
+          <div className="flex justify-between items-start">
+            <h3 className="text-xl font-bold text-slate-900 font-cairo line-clamp-2 group-hover:text-sky-600 transition-colors">
+              {report.title || `${report.type} Air Quality Report`}
+            </h3>
+            <button onClick={() => setIsDetailsModalOpen(true)} className="text-slate-400 hover:text-sky-600">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" /></svg>
+            </button>
+          </div>
+          <p className="text-sm text-slate-500 mt-1">{date}</p>
           <p className="text-sm text-slate-600 mt-2 line-clamp-3">
-            {report.description || "AI-generated comprehensive analysis of air quality data from our DePIN network sensors."}
+            LLM-ready AQI Report
           </p>
         </div>
 
@@ -168,6 +179,10 @@ export function RefinedReportCard({
             <p className="text-xs text-slate-500">Blockchain-verified</p>
           </div>
         </div>
+
+        <button onClick={() => setIsRawDataModalOpen(true)} className="w-full text-center text-xs text-sky-600 hover:underline">
+            See Raw Data
+        </button>
 
         {/* Action Button */}
         <Button
@@ -224,6 +239,58 @@ export function RefinedReportCard({
             <BenefitItem text="Blockchain-verified ownership" />
           </ul>
         </div>
+      </div>
+      {isDetailsModalOpen && <ReportDetailsModal report={report} onClose={() => setIsDetailsModalOpen(false)} />}
+      {isRawDataModalOpen && <RawDataModal primitiveData={report.primitive_data} onClose={() => setIsRawDataModalOpen(false)} />}
+    </div>
+  );
+}
+
+function ReportDetailsModal({ report, onClose }: { report: RefinedReport, onClose: () => void }) {
+  const ipfsHashMatch = report.processing.ipfs_uri?.match(/ipfs:\/\/(.*)/);
+  const ipfsHash = ipfsHashMatch ? ipfsHashMatch[1] : null;
+  const ipfsGatewayUrl = ipfsHash ? `https://ipfs.io/ipfs/${ipfsHash}` : null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-6 max-w-2xl w-full" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-xl font-bold text-slate-900 mb-4">Verification Details</h3>
+        <div className="space-y-2 text-sm">
+          <div>
+            <label className="font-semibold">Merkle Root:</label>
+            <p className="font-mono text-xs break-all">{report.processing.merkle_root || 'N/A'}</p>
+          </div>
+          <div>
+            <label className="font-semibold">IPFS URI:</label>
+            {ipfsGatewayUrl ? (
+              <a 
+                href={ipfsGatewayUrl} 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="font-mono text-xs break-all text-blue-600 hover:underline"
+              >
+                {report.processing.ipfs_uri}
+              </a>
+            ) : (
+              <p className="font-mono text-xs break-all">{report.processing.ipfs_uri || 'N/A'}</p>
+            )}
+          </div>
+        </div>
+        <Button onClick={onClose} className="w-full mt-6">Close</Button>
+      </div>
+    </div>
+  );
+}
+
+function RawDataModal({ primitiveData, onClose }: { primitiveData: any, onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <h3 className="text-xl font-bold text-slate-900 mb-4">Raw Sensor Data</h3>
+        <pre className="bg-slate-100 p-4 rounded-lg text-xs">
+          {JSON.stringify(primitiveData, null, 2)}
+        </pre>
+        <Button onClick={onClose} className="w-full mt-6">Close</Button>
       </div>
     </div>
   );
