@@ -828,68 +828,6 @@ export default function Dashboard() {
   );
 }
 
-
-
-function DerivativesView() {
-  const [derivatives, setDerivatives] = useState<RefinedReport[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const { walletAddress } = useAuthStore();
-
-  useEffect(() => {
-    const loadDerivatives = async () => {
-      if (!walletAddress) {
-        setIsLoading(false);
-        setError("Wallet address not found.");
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        const data = await browseMarketplace({ creator: walletAddress });
-        setDerivatives(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load derivatives.");
-        console.error("Failed to load derivatives:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadDerivatives();
-  }, [walletAddress]);
-
-  if (isLoading) {
-    return (
-      <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p className="mt-4 text-gray-500">Loading derivatives...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return <div className="text-center py-24 text-red-500">{error}</div>;
-  }
-
-  if (derivatives.length === 0) {
-    return (
-      <div className="text-center py-24">
-        <h2 className="text-xl font-bold text-black mb-2">No Derivatives Found</h2>
-        <p className="text-slate-400">You have not created any derivatives yet.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {derivatives.map((derivative) => (
-        <DerivativeCard key={derivative.derivative_id} derivative={derivative} />
-      ))}
-    </div>
-  );
-}
-
 function DerivativeCard({ derivative, onClick }: { derivative: RefinedReport, onClick: () => void }) {
   const titleMatch = derivative.content.match(/# 📜 (.*)/);
   const title = titleMatch ? titleMatch[1] : 'Untitled Derivative';
@@ -915,3 +853,4 @@ function DerivativeCard({ derivative, onClick }: { derivative: RefinedReport, on
     </button>
   );
 }
+
