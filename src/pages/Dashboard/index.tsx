@@ -26,6 +26,120 @@ import {
 import { getUserDevices, deleteDevice, type Device } from "../../services/api/device.service";
 import { browseMarketplace, type RefinedReport } from "../../services/api/marketplace.service";
 import { useAuthStore } from "../../app/store/authStore";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+// ... (keep existing interfaces)
+
+interface DerivativeModalState {
+  show: boolean;
+  content: string;
+}
+
+// ... (keep existing Dashboard component up to the main render)
+
+// ... (inside Dashboard component)
+  
+// ... (rest of the state and functions)
+
+
+// ... (at the end of the file, before the other component functions)
+function DerivativesView() {
+  const [derivatives, setDerivatives] = useState<RefinedReport[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { walletAddress } = useAuthStore();
+  const [selectedDerivative, setSelectedDerivative] = useState<RefinedReport | null>(null);
+
+  useEffect(() => {
+    const loadDerivatives = async () => {
+      if (!walletAddress) {
+        setIsLoading(false);
+        setError("Wallet address not found.");
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        const data = await browseMarketplace({ creator: walletAddress });
+        setDerivatives(data);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Failed to load derivatives.");
+        console.error("Failed to load derivatives:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDerivatives();
+  }, [walletAddress]);
+
+  const openModal = (derivative: RefinedReport) => {
+    setSelectedDerivative(derivative);
+  };
+
+  const closeModal = () => {
+    setSelectedDerivative(null);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <p className="mt-4 text-gray-500">Loading derivatives...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-center py-24 text-red-500">{error}</div>;
+  }
+
+  if (derivatives.length === 0) {
+    return (
+      <div className="text-center py-24">
+        <h2 className="text-xl font-bold text-black mb-2">No Derivatives Found</h2>
+        <p className="text-slate-400">You have not created any derivatives yet.</p>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="space-y-4">
+        {derivatives.map((derivative) => (
+          <DerivativeCard key={derivative.derivative_id} derivative={derivative} onClick={() => openModal(derivative)} />
+        ))}
+      </div>
+      {selectedDerivative && (
+        <DerivativeContentModal
+          content={selectedDerivative.content}
+          onClose={closeModal}
+        />
+      )}
+    </>
+  );
+}
+
+function DerivativeContentModal({ content, onClose }: { content: string, onClose: () => void }) {
+  return (
+    <div
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto prose"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+        <Button onClick={onClose} className="w-full mt-6 bg-black text-white hover:bg-gray-800 rounded-xl">
+          Close
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 
 interface ToastState {
   show: boolean;
@@ -776,34 +890,28 @@ function DerivativesView() {
   );
 }
 
-function DerivativeCard({ derivative }: { derivative: RefinedReport }) {
+function DerivativeCard({ derivative, onClick }: { derivative: RefinedReport, onClick: () => void }) {
+  const titleMatch = derivative.content.match(/# 📜 (.*)/);
+  const title = titleMatch ? titleMatch[1] : 'Untitled Derivative';
+
   return (
-    <div className="p-6 bg-gray-50 border-2 border-gray-200 rounded-2xl hover:border-blue-500/50 transition-all">
-        <div className="flex items-start justify-between mb-4">
-            <div>
-                <h3 className="font-bold text-black text-lg">{derivative.title || "Untitled Derivative"}</h3>
-                <p className="text-sm text-gray-600 mt-1">{derivative.type}</p>
-            </div>
-            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-              derivative.is_minted
-                ? "bg-green-100 text-green-700"
-                : "bg-yellow-100 text-yellow-700"
-            }`}>
-                {derivative.is_minted ? "Minted" : "Not Minted"}
-            </span>
+    <button
+      onClick={onClick}
+      className="w-full text-left p-4 bg-gray-50 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+    >
+      <div className="flex items-start justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${derivative.is_minted ? 'bg-green-500' : 'bg-yellow-500'}`}></div>
+          <span className="text-sm font-semibold text-gray-900">{title}</span>
         </div>
-         <div className="space-y-2 text-sm">
-            <div className="flex justify-between">
-                <span className="text-gray-500">IP ID:</span>
-                <span className="font-mono text-gray-800">{derivative.ip_id ? `${derivative.ip_id.slice(0, 8)}...` : "N/A"}</span>
-            </div>
-            <div className="flex justify-between">
-                <span className="text-gray-500">Created:</span>
-                <span className="text-gray-800">
-                    {new Date(derivative.created_at).toLocaleDateString()}
-                </span>
-            </div>
-        </div>
-    </div>
+        <span className="text-xs text-gray-500">
+          {new Date(derivative.created_at).toLocaleDateString()}
+        </span>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mt-2">
+        <div className="text-xs"><span className="text-gray-500">Type:</span><span className="font-semibold text-gray-900 ml-1">{derivative.type}</span></div>
+        <div className="text-xs"><span className="text-gray-500">IP ID:</span><span className="font-mono text-gray-900 ml-1">{derivative.ip_id ? `${derivative.ip_id.slice(0, 6)}...` : 'N/A'}</span></div>
+      </div>
+    </button>
   );
 }
