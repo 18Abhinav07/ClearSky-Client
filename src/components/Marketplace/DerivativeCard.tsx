@@ -11,7 +11,6 @@ import { useStoryClient } from "../../hooks/useStoryClient";
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
-import { recordPurchase } from "../../services/api/user-assets.service";
 import { type DerivativeAsset } from "../../services/api/marketplace.service";
 
 interface DerivativeCardProps {
@@ -44,16 +43,9 @@ export function DerivativeCard({
     try {
       // REAL BLOCKCHAIN CALL - Mint License from Child IP
       const result = await storyClient.buyLicense({
-        ipId: derivative.childIpId as Address,
-        licenseTermsId: derivative.licenseTermsId,
-        priceWIP: derivative.price_wip
-      });
-
-      // Sync with backend
-      await recordPurchase({
-        ipId: derivative.childIpId,
-        licenseTokenId: result.licenseTokenId,
-        txHash: result.txHash
+        ipId: derivative.child_ip_id as Address, // Use child_ip_id
+        licenseTermsId: derivative.license_terms_id, // Use license_terms_id
+        priceWIP: derivative.price.toString() // Use price
       });
 
       toast.success("License purchased from derivative!");
@@ -69,11 +61,11 @@ export function DerivativeCard({
 
   const getBadgeColor = (type: string) => {
     switch (type) {
-      case "creative_derivative":
+      case "MODEL":
         return "bg-purple-50 text-purple-700 border border-purple-200";
-      case "remix":
+      case "DATASET":
         return "bg-pink-50 text-pink-700 border border-pink-200";
-      case "analysis":
+      case "ANALYSIS":
         return "bg-cyan-50 text-cyan-700 border border-cyan-200";
       default:
         return "bg-slate-50 text-slate-700 border border-slate-200";
@@ -85,33 +77,24 @@ export function DerivativeCard({
       {/* Gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 to-pink-50/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-      {/* Thumbnail */}
-      {derivative.metadata.thumbnailUrl && (
-        <div className="relative h-56 overflow-hidden">
+      {/* No Thumbnail - as it's not available in the new DerivativeAsset structure */}
+      {/* <div className="relative h-56 overflow-hidden">
           <img
             src={derivative.metadata.thumbnailUrl}
             alt={derivative.metadata.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-white to-transparent" />
-
-          {/* Type Badge */}
-          <div className="absolute top-4 right-4">
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getBadgeColor(derivative.metadata.type)}`}>
-              {derivative.metadata.type.replace(/_/g, " ")}
-            </span>
-          </div>
-        </div>
-      )}
+        </div> */}
 
       <div className="relative p-6 space-y-4">
         {/* Header */}
         <div>
           <h3 className="text-lg font-bold text-slate-900 font-cairo line-clamp-2 group-hover:text-purple-600 transition-colors">
-            {derivative.metadata.title}
+            {derivative.title}
           </h3>
           <p className="text-sm text-slate-600 mt-2 line-clamp-2">
-            {derivative.metadata.description}
+            {derivative.description}
           </p>
         </div>
 
@@ -122,7 +105,7 @@ export function DerivativeCard({
           </svg>
           <span className="text-slate-500">Derived from:</span>
           <span className="font-mono text-slate-700">
-            {derivative.parentIpId.slice(0, 6)}...{derivative.parentIpId.slice(-4)}
+            {derivative.parent_ip_id.slice(0, 6)}...{derivative.parent_ip_id.slice(-4)}
           </span>
         </div>
 
@@ -133,7 +116,7 @@ export function DerivativeCard({
           </svg>
           <span>Creator:</span>
           <span className="font-mono">
-            {derivative.creatorAddress.slice(0, 6)}...{derivative.creatorAddress.slice(-4)}
+            {derivative.creator_wallet.slice(0, 6)}...{derivative.creator_wallet.slice(-4)}
           </span>
         </div>
 
@@ -145,7 +128,7 @@ export function DerivativeCard({
           <div>
             <div className="flex items-baseline gap-2">
               <span className="text-2xl font-bold text-slate-900">
-                {derivative.price_wip}
+                {derivative.price}
               </span>
               <span className="text-slate-600 font-semibold">WIP</span>
             </div>

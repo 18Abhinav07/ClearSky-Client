@@ -10,40 +10,24 @@ import { getUserCreations } from "../../services/api/user-assets.service";
 import { CreationCard } from "../../components/UserProfile/CreationCard";
 import { useStoryClient } from "../../hooks/useStoryClient";
 import { useToast } from "../../hooks/use-toast";
+import { useAuth } from "../../hooks/useAuth"; // Import useAuth
+import { type RefinedReport } from "../../services/api/marketplace.service"; // Import RefinedReport
 
 export function MyCreationsTab() {
   const storyClient = useStoryClient();
   const toast = useToast();
+  const { address } = useAuth(); // Get address from useAuth
 
   const { data: creations, isLoading, refetch } = useQuery({
-    queryKey: ["user-creations"],
-    queryFn: getUserCreations
+    queryKey: ["user-creations", address], // Update queryKey
+    queryFn: () => getUserCreations(address!), // Pass address to getUserCreations
+    enabled: !!address, // Only run query if address is available
   });
 
+  // Temporarily remove handleClaimRevenue and related blockchain logic for now
+  // as RefinedReport does not directly contain IP asset specific fields like childIpIds
   const handleClaimRevenue = async (creation: any) => {
-    if (!storyClient) {
-      toast.error("Please connect your wallet");
-      return;
-    }
-
-    try {
-      // REAL BLOCKCHAIN CALL - Claim royalty revenue
-      const result = await storyClient.claimAllRevenue({
-        ipId: creation.ipId,
-        childIpIds: creation.childIpIds
-      });
-
-      toast.success(
-        `Revenue claimed successfully! ${result.amount} WIP tokens transferred`
-      );
-
-      // Refresh data
-      refetch();
-
-    } catch (error: any) {
-      console.error("[MyCreationsTab] Claim failed:", error);
-      toast.error(error.message || "Failed to claim revenue");
-    }
+    toast.info("Claim revenue functionality is under development for this view.");
   };
 
   if (isLoading) {
@@ -54,55 +38,13 @@ export function MyCreationsTab() {
     return <EmptyState />;
   }
 
-  // Calculate total stats
-  const totalRevenue = creations.reduce(
-    (sum, c) => sum + parseFloat(c.totalRevenue || "0"),
-    0
-  );
-  const totalClaimable = creations.reduce(
-    (sum, c) => sum + parseFloat(c.claimableRevenue || "0"),
-    0
-  );
-  const totalChildren = creations.reduce(
-    (sum, c) => sum + c.childrenCount,
-    0
-  );
-
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
-      <div className="grid md:grid-cols-4 gap-4">
-        <StatCard
-          label="Total Creations"
-          value={creations.length}
-          subtext="IP Assets"
-          gradient="from-blue-500 to-cyan-500"
-        />
-        <StatCard
-          label="Total Revenue"
-          value={`${totalRevenue.toFixed(2)} WIP`}
-          subtext="All time"
-          gradient="from-green-500 to-emerald-500"
-        />
-        <StatCard
-          label="Claimable"
-          value={`${totalClaimable.toFixed(2)} WIP`}
-          subtext="Ready to claim"
-          gradient="from-yellow-500 to-orange-500"
-        />
-        <StatCard
-          label="Derivatives"
-          value={totalChildren}
-          subtext="Child IPs"
-          gradient="from-purple-500 to-pink-500"
-        />
-      </div>
-
       {/* Creations Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
         {creations.map((creation) => (
           <CreationCard
-            key={creation.ipId}
+            key={creation.derivative_id} // Use derivative_id as key for RefinedReport
             creation={creation}
             onClaimRevenue={() => handleClaimRevenue(creation)}
           />

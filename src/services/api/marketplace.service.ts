@@ -71,18 +71,27 @@ export interface SearchResponse {
 }
 
 export interface DerivativeAsset {
-  childIpId: string;
-  parentIpId: string;
-  creatorAddress: string;
-  metadata: {
-    title: string;
-    description: string;
-    type: "creative_derivative" | "remix" | "analysis";
-    thumbnailUrl?: string;
-  };
-  licenseTermsId: string;
-  price_wip: string;
+  _id: string;
+  creator_wallet: string;
+  parent_asset_id: string;
+  parent_ip_id: string;
+  child_ip_id: string;
+  child_token_id: string;
+  title: string;
+  description: string;
+  derivative_type: string;
+  content_uri: string;
+  ipfs_hash: string;
+  price: number;
+  creator_rev_share: number;
+  is_listed: boolean;
+  total_sales: number;
+  total_revenue: number;
+  license_terms_id: string;
+  user_derivative_id: string;
   createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 // ============================================================================
@@ -177,13 +186,48 @@ const ENDPOINTS = {
   // Keep SEARCH for now, but it's deprecated
   SEARCH: `${env.API_BASE_URL}/api/v1/marketplace/search`,
   DERIVATIVES: `${env.API_BASE_URL}/api/v1/marketplace/derivatives`,
+  CREATE_DERIVATIVE: `${env.API_BASE_URL}/api/v1/marketplace/derivatives/create`,
+  COMMUNITY_DERIVATIVES: `${env.API_BASE_URL}/api/v1/marketplace/derivatives/community`,
 } as const;
+
+export interface CreateDerivativeRequest {
+  parentAssetId: string;
+  title: string;
+  description: string;
+  derivativeType: string;
+  contentUri: string;
+  price: number;
+  creatorRevShare: number;
+}
 
 // ... (keep mock data for now)
 
 // ============================================================================
 // API FUNCTIONS
 // ============================================================================
+
+export async function createUserDerivative(data: CreateDerivativeRequest) {
+  const tokens = getStoredTokens();
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (tokens?.access_token) {
+    headers["Authorization"] = `Bearer ${tokens.access_token}`;
+  }
+
+  const response = await fetch(ENDPOINTS.CREATE_DERIVATIVE, {
+    method: "POST",
+    headers,
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.json();
+    throw new Error(errorBody.message || "Failed to create derivative");
+  }
+
+  return response.json();
+}
 
 /**
  * Browse available derivatives in the marketplace.
@@ -232,6 +276,38 @@ export async function browseMarketplace(params: BrowseDerivativesRequest): Promi
   // The backend wraps the array in a "data" property
   // The backend's "derivative" objects match the frontend's "RefinedReport" type
   return result.data as RefinedReport[];
+}
+
+/**
+ * Fetch community-created derivatives from the marketplace.
+ * Aligns with the backend's GET /api/v1/marketplace/derivatives/community endpoint.
+ *
+ * @returns A promise that resolves to a list of DerivativeAsset objects
+ */
+export async function getCommunityDerivatives(): Promise<DerivativeAsset[]> {
+  const url = ENDPOINTS.COMMUNITY_DERIVATIVES;
+  const tokens = getStoredTokens();
+  const headers: HeadersInit = {
+    "Content-Type": "application/json"
+  };
+
+  if (tokens?.access_token) {
+    headers["Authorization"] = `Bearer ${tokens.access_token}`;
+  }
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers
+  });
+
+  if (!response.ok) {
+    const errorBody = await response.text();
+    console.error("Failed to fetch community derivatives:", errorBody);
+    throw new Error(`Failed to fetch community derivatives. Status: ${response.status}`);
+  }
+
+  const result = await response.json();
+  return result.data as DerivativeAsset[];
 }
 
 

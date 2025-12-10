@@ -72,7 +72,7 @@ export class StoryService {
     const config: StoryConfig = {
       account: walletClient.account,
       transport: http(STORY_TESTNET_RPC),
-      chainId: STORY_TESTNET_CHAIN_ID as any,
+            chainId: "sepolia", // Changed to string
     };
 
     this.client = StoryClient.newClient(config);

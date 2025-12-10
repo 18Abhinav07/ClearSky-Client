@@ -77,6 +77,7 @@ export function MyCollectionTab() {
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {purchases.map((asset) => {
             const license: PurchasedLicense = {
+              assetId: asset.asset_id,
               licenseTokenId: asset.license_token_id,
               ipId: asset.ip_id,
               derivativeId: asset.derivative_id,
@@ -100,6 +101,7 @@ export function MyCollectionTab() {
       {/* Create Derivative Modal */}
       {selectedForDerivative && (
         <CreateDerivativeModal
+          parentAssetId={selectedForDerivative.assetId}
           parentIpId={selectedForDerivative.ipId}
           parentLicenseTokenId={selectedForDerivative.licenseTokenId}
           onClose={() => setSelectedForDerivative(null)}
