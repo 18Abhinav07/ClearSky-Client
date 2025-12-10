@@ -9,11 +9,6 @@ interface NavbarProps {
 }
 
 const Navbar = ({ onGetStarted }: NavbarProps) => {
-  const navLinks = [
-    { label: "Marketplace", href: "/marketplace" },
-    { label: "About us", href: "#about" },
-    
-  ];
   const { isAuthenticated } = useAuth();
   const { devices } = useAuthStore();
   const navigate = useNavigate();
@@ -36,20 +31,10 @@ const Navbar = ({ onGetStarted }: NavbarProps) => {
             <span className="text-xl font-bold text-black">ClearSky</span>
           </div>
 
-          {/* Nav Links - Only show when authenticated */}
-          {isAuthenticated && (
-            <div className="hidden md:flex items-center gap-8">
-              {navLinks.map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-sm font-medium text-gray-700 hover:text-black transition-colors"
-                >
-                  {link.label}
-                </a>
-              ))}
-            </div>
-          )}
+          {/* Center space - empty for cleaner look */}
+          <div className="hidden md:flex items-center gap-8">
+            {/* Navigation links removed - using buttons on the right instead */}
+          </div>
 
           {/* Right Actions */}
           <div className="flex items-center gap-3">
