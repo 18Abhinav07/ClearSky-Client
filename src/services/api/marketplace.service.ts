@@ -211,7 +211,10 @@ const MOCK_DERIVATIVES: DerivativeAsset[] = [
 ];
 
 export interface BrowseDerivativesRequest {
-  type?: string;
+  city?: string;
+  sensorType?: string;
+  dateFrom?: string;
+  dateTo?: string;
   is_minted?: boolean;
   limit?: number;
   offset?: number;

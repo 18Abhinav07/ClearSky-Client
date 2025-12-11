@@ -7,7 +7,6 @@
 
 import React from "react";
 import { WagmiProvider as WagmiProviderBase, createConfig } from "wagmi";
-import { base, baseSepolia } from "wagmi/chains";
 import { http } from "viem";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { createCDPEmbeddedWalletConnector } from "@coinbase/cdp-wagmi";
@@ -52,10 +51,8 @@ const cdpConfig: Config = {
 const connector = createCDPEmbeddedWalletConnector({
   cdpConfig: cdpConfig,
   providerConfig: {
-    chains: [base, baseSepolia, storyTestnet],
+    chains: [storyTestnet], // ONLY Story testnet - Base networks removed
     transports: {
-      [base.id]: http(),
-      [baseSepolia.id]: http(),
       [storyTestnet.id]: http(STORY_TESTNET_RPC),
     },
   },
@@ -64,10 +61,8 @@ const connector = createCDPEmbeddedWalletConnector({
 // Wagmi Configuration
 const wagmiConfig = createConfig({
   connectors: [connector],
-  chains: [base, baseSepolia, storyTestnet],
+  chains: [storyTestnet], // ONLY Story testnet - Base networks removed
   transports: {
-    [base.id]: http(),
-    [baseSepolia.id]: http(),
     [storyTestnet.id]: http(STORY_TESTNET_RPC),
   },
 });

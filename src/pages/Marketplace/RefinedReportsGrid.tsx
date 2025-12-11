@@ -7,27 +7,29 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { browseMarketplace, type RefinedReport, type SearchRequest } from "../../services/api/marketplace.service";
+import { browseMarketplace, type RefinedReport } from "../../services/api/marketplace.service";
 import { GeneratingLoader } from "../../components/Marketplace/GeneratingLoader";
 import { RefinedReportCard } from "../../components/Marketplace/RefinedReportCard";
 import { Button } from "../../components/ui/button";
 
 interface RefinedReportsGridProps {
-  searchParams: Omit<SearchRequest, 'start_date' | 'end_date' | 'city'> & { type?: string };
+  searchParams: {
+    city?: string;
+    sensorType?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  };
 }
 
 export function RefinedReportsGrid({ searchParams }: RefinedReportsGridProps) {
   const [detailsModalReport, setDetailsModalReport] = useState<RefinedReport | null>(null);
   const [rawDataModalReport, setRawDataModalReport] = useState<RefinedReport | null>(null);
 
-  const queryParams = {
-    is_minted: false,
-  };
-
+  // Use searchParams directly without adding creator filter
+  // This ensures all derivatives matching the search criteria are shown
   const { data: reports, isLoading, refetch } = useQuery({
-    queryKey: ["marketplace-browse", queryParams],
-    queryFn: () => browseMarketplace(queryParams),
-    enabled: !!searchParams.type
+    queryKey: ["marketplace-browse", searchParams],
+    queryFn: () => browseMarketplace(searchParams),
   });
 
   if (isLoading) {
@@ -54,15 +56,16 @@ export function RefinedReportsGrid({ searchParams }: RefinedReportsGridProps) {
 
   return (
     <>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="flex gap-8 overflow-x-auto pb-4 max-h-[350px]">
         {reports.map((report) => (
-          <RefinedReportCard
-            key={report.derivative_id}
-            report={report}
-            onPurchaseSuccess={() => refetch()}
-            onOpenDetails={() => setDetailsModalReport(report)}
-            onOpenRawData={() => setRawDataModalReport(report)}
-          />
+          <div key={report.derivative_id} className="flex-shrink-0 w-90">
+        <RefinedReportCard
+          report={report}
+          onPurchaseSuccess={() => refetch()}
+          onOpenDetails={() => setDetailsModalReport(report)}
+          onOpenRawData={() => setRawDataModalReport(report)}
+        />
+          </div>
         ))}
       </div>
       {detailsModalReport && <ReportDetailsModal report={detailsModalReport} onClose={() => setDetailsModalReport(null)} />}

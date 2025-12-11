@@ -117,10 +117,10 @@ export function MyCollectionTab() {
 
 function StatCard({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+    <div className="p-4 bg-white/60 border border-slate-800 rounded-xl">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-400">{label}</p>
+          <p className="text-sm text-black/80">{label}</p>
           <p className="text-3xl font-bold text-white mt-1">{value}</p>
         </div>
         <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">

@@ -84,17 +84,17 @@ export function LicenseCard({
   };
   
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-700 bg-white/50 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10">
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-white  opacity-0  transition-opacity duration-300" />
 
       <div className="relative p-6 space-y-4">
         {/* Header */}
         <div>
-          <h3 className="text-lg font-bold text-white font-cairo line-clamp-2">
+          <h3 className="text-lg font-bold text-black font-cairo line-clamp-2">
             {title}
           </h3>
-          <p className="text-sm text-slate-400 mt-2 line-clamp-2">
+          <p className="text-sm text-black-400 mt-2 line-clamp-2">
             {description}
           </p>
         </div>
@@ -103,19 +103,19 @@ export function LicenseCard({
         <div className="space-y-2 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-slate-500">License Token:</span>
-            <span className="font-mono text-slate-300">
+            <span className="font-mono text-black-300">
               {license.licenseTokenId.slice(0, 6)}...{license.licenseTokenId.slice(-4)}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-slate-500">IP Asset:</span>
-            <span className="font-mono text-slate-300">
+            <span className="font-mono text-black-300">
               {license.ipId.slice(0, 6)}...{license.ipId.slice(-4)}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-slate-500">Purchased:</span>
-            <span className="text-slate-300">
+            <span className="text-black-300">
               {new Date(license.purchasedAt).toLocaleDateString()}
             </span>
           </div>
@@ -165,16 +165,7 @@ export function LicenseCard({
         </div>
 
         {/* Security Info */}
-        <div className="pt-2">
-          <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-            <svg className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            <p className="text-xs text-blue-300">
-              Secure download uses wallet signature verification to ensure only license holders can access content
-            </p>
-          </div>
-        </div>
+       
       </div>
     </div>
   );

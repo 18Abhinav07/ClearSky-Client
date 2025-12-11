@@ -121,7 +121,7 @@ export function CreateDerivativeModal({
               <input type="file" onChange={handleFileChange} className="w-full" disabled={isCreating} />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">Price (WIP tokens)</label>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">Price (IP tokens)</label>
               <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} className="w-full px-4 py-3 bg-white border-2 border-gray-200 rounded-xl" disabled={isCreating} />
             </div>
             <div>
