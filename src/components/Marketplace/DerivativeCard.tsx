@@ -5,11 +5,17 @@
  * Supports custom pricing set by creator
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { type Address, parseUnits, formatUnits } from "viem";
+import { useAccount, useBalance, useSwitchChain } from "wagmi";
 import { useAuth } from "../../hooks/useAuth";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
 import { purchaseCommunityDerivative, type DerivativeAsset } from "../../services/api/marketplace.service";
+import { STORY_TESTNET_CHAIN_ID } from "../../config/story-contracts";
+
+// Payment recipient address
+const PAYMENT_ADDRESS = "0xe7a5731070145b490fc9c81a45f98dc04bbece20" as Address;
 
 interface DerivativeCardProps {
   derivative: DerivativeAsset;
@@ -21,27 +27,200 @@ export function DerivativeCard({
   onPurchaseSuccess
 }: DerivativeCardProps) {
   const { address } = useAuth();
+  const { address: wagmiAddress, chain } = useAccount();
   const toast = useToast();
   const [isPurchasing, setIsPurchasing] = useState(false);
+  const [awaitingPurchase, setAwaitingPurchase] = useState(false);
+  const [txHash, setTxHash] = useState<`0x${string}` | null>(null);
+
+  // Get balance on Story testnet
+  const { data: balanceData } = useBalance({
+    address: wagmiAddress,
+    chainId: STORY_TESTNET_CHAIN_ID,
+  });
+
+  const { switchChain } = useSwitchChain();
+
+  // Effect to handle purchase after payment confirmation
+  useEffect(() => {
+    if (txHash && awaitingPurchase) {
+      const monitorTransaction = async () => {
+        try {
+          console.log("[DerivativeCard] Monitoring transaction:", txHash);
+          const receipt = await window.ethereum!.request({
+            method: "eth_getTransactionReceipt",
+            params: [txHash],
+          }) as any;
+
+          if (receipt && receipt.blockNumber) {
+            console.log("[DerivativeCard] ✅ Transaction confirmed!");
+            await completePurchase(txHash);
+          } else {
+            // Check again in 2 seconds
+            setTimeout(monitorTransaction, 2000);
+          }
+        } catch (error) {
+          console.error("[DerivativeCard] Error monitoring transaction:", error);
+          setTimeout(monitorTransaction, 2000);
+        }
+      };
+      monitorTransaction();
+    }
+  }, [txHash, awaitingPurchase]);
+
+  const completePurchase = async (paymentTxHash: `0x${string}`) => {
+    console.log("[DerivativeCard] ✅ Payment confirmed! Proceeding with backend purchase...");
+    console.log("[DerivativeCard] Payment TX hash:", paymentTxHash);
+    toast("Step 3/3: Finalizing purchase...");
+
+    try {
+      console.log("[DerivativeCard] Calling backend purchase API...");
+      await purchaseCommunityDerivative(derivative.user_derivative_id, address!);
+      
+      console.log("[DerivativeCard] ✅ Purchase flow completed successfully!");
+      toast.success("Purchase successful! Check your profile to view your license.");
+      onPurchaseSuccess?.();
+    } catch (error: any) {
+      console.error("[DerivativeCard] ❌ Purchase completion failed:", error);
+      toast.error(`Failed to complete purchase: ${error.message || "Unknown error"}`);
+    } finally {
+      setIsPurchasing(false);
+      setAwaitingPurchase(false);
+      setTxHash(null);
+    }
+  };
 
   const handleBuyLicense = async () => {
-    if (!address) {
+    // Validation checks
+    if (!address || !wagmiAddress) {
+      console.error("[DerivativeCard] Wallet not connected:", { address, wagmiAddress });
       toast.error("Please connect your wallet first");
       return;
     }
 
+    console.log("[DerivativeCard] Starting purchase flow...");
+    console.log("[DerivativeCard] Current chain:", chain?.id, chain?.name);
+    console.log("[DerivativeCard] User address:", wagmiAddress);
+    console.log("[DerivativeCard] Payment recipient:", PAYMENT_ADDRESS);
+    console.log("[DerivativeCard] Price:", derivative.price, "IP");
+
     setIsPurchasing(true);
 
     try {
-      await purchaseCommunityDerivative(derivative.user_derivative_id, address);
-      toast.success("License purchased from derivative!");
-      onPurchaseSuccess?.();
+      // Step 0: MUST be on Story testnet - force switch if not
+      if (chain?.id !== STORY_TESTNET_CHAIN_ID) {
+        console.log(`[DerivativeCard] ❌ Wrong network detected!`);
+        toast("Switching to Story Protocol testnet...");
+        
+        try {
+          await switchChain({ chainId: STORY_TESTNET_CHAIN_ID });
+          console.log("[DerivativeCard] ✅ Successfully switched to Story testnet");
+          toast.success("Switched to Story Protocol testnet!");
+          
+          // Wait for chain switch to complete
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        } catch (switchError: any) {
+          // Try manual approach if wagmi fails
+          if (window.ethereum && switchError.code === 4902) {
+            console.log("[DerivativeCard] Adding Story Testnet...");
+            toast("Adding Story Testnet to your wallet...");
+            
+            await window.ethereum.request({
+              method: "wallet_addEthereumChain",
+              params: [{
+                chainId: "0x5E9", // 1513 in hex
+                chainName: "Story Protocol Testnet",
+                rpcUrls: ["https://testnet.storyrpc.io"],
+                nativeCurrency: {
+                  name: "IP",
+                  symbol: "IP",
+                  decimals: 18
+                },
+                blockExplorerUrls: ["https://testnet.storyscan.xyz"]
+              }]
+            });
+            console.log("[DerivativeCard] ✅ Story Testnet added");
+            await new Promise(resolve => setTimeout(resolve, 2000));
+          } else {
+            console.error("[DerivativeCard] ❌ Chain switch failed:", switchError);
+            toast.error("Failed to switch to Story testnet. Please switch manually.");
+            setIsPurchasing(false);
+            return;
+          }
+        }
+      }
 
+      // Step 1: Prepare payment transaction
+      console.log("[DerivativeCard] Step 1/3: Preparing payment transaction...");
+      toast("Step 1/3: Initiating payment transfer...");
+
+      const priceIP = String(derivative.price);
+      const amountInWei = parseUnits(priceIP, 18);
+      
+      console.log("[DerivativeCard] Transaction details:");
+      console.log("  - Price (IP):", priceIP);
+      console.log("  - Amount (Wei):", amountInWei.toString());
+
+      // Check balance
+      if (balanceData) {
+        const balanceInIP = formatUnits(balanceData.value, 18);
+        console.log("[DerivativeCard] Current balance:", balanceInIP, "IP");
+        
+        if (balanceData.value < amountInWei) {
+          const shortfallIP = formatUnits(amountInWei - balanceData.value, 18);
+          toast.error(`Insufficient IP balance. You need ${shortfallIP} more IP.`);
+          setIsPurchasing(false);
+          return;
+        }
+      }
+
+      // Send transaction via MetaMask
+      if (!window.ethereum) {
+        toast.error("MetaMask not found. Please install MetaMask.");
+        setIsPurchasing(false);
+        return;
+      }
+
+      console.log("[DerivativeCard] Requesting MetaMask connection...");
+      toast("Connecting to MetaMask...");
+      
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      }) as string[];
+      
+      if (!accounts || accounts.length === 0) {
+        throw new Error("No accounts found in MetaMask");
+      }
+      
+      const metamaskAddress = accounts[0];
+      console.log("[DerivativeCard] ✅ MetaMask connected:", metamaskAddress);
+      toast.success("MetaMask connected!");
+      
+      console.log("[DerivativeCard] Sending transaction via MetaMask...");
+      toast("Step 2/3: Approve transaction in MetaMask...");
+      
+      const transactionHash = await window.ethereum.request({
+        method: "eth_sendTransaction",
+        params: [{
+          from: metamaskAddress,
+          to: PAYMENT_ADDRESS,
+          value: `0x${amountInWei.toString(16)}`,
+        }],
+      }) as `0x${string}`;
+      
+      console.log("[DerivativeCard] ✅ Transaction submitted!");
+      console.log("[DerivativeCard] TX hash:", transactionHash);
+      toast("Transaction submitted! Waiting for confirmation...");
+      
+      setTxHash(transactionHash);
+      setAwaitingPurchase(true);
+      
     } catch (error: any) {
-      console.error("[DerivativeCard] Purchase failed:", error);
-      toast.error(error.message || "Failed to purchase license");
-    } finally {
+      console.error("[DerivativeCard] ❌ Purchase failed:", error);
+      toast.error(`Failed to purchase: ${error.message || "Unknown error"}`);
       setIsPurchasing(false);
+      setAwaitingPurchase(false);
+      setTxHash(null);
     }
   };
 

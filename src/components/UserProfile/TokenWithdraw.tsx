@@ -211,12 +211,7 @@ export function TokenWithdraw() {
         </div>
 
         {/* Manage Button */}
-        <Button
-          onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all text-sm shadow-lg shadow-sky-200"
-        >
-          Manage Tokens
-        </Button>
+       
       </div>
 
       {/* Modal - Rendered at document.body level using React Portal */}
