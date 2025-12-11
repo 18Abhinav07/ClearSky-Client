@@ -7,20 +7,47 @@
  * - Tab C: My Creations (owned IP assets)
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { MyCollectionTab } from "./MyCollectionTab";
 import { MyCreationsTab } from "./MyCreationsTab";
 import { TokenWithdraw } from "../../components/UserProfile/TokenWithdraw";
 import { useNavigate } from "react-router-dom";
+import { useAccount } from "wagmi";
 
 type Tab =   "collection" | "creations";
 
 export default function UserProfile() {
   const { address, isAuthenticated } = useAuth();
+  const { isConnected } = useAccount();
   const [activeTab, setActiveTab] = useState<Tab>("collection");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const navigate = useNavigate();
-  if (!isAuthenticated || !address) {
+
+  // Give wallet state time to sync after navigation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsCheckingAuth(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show loader while checking authentication state
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4">
+            <div className="w-16 h-16 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin"></div>
+          </div>
+          <p className="text-slate-600">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check both auth state and wallet connection
+  if (!isAuthenticated || !address || !isConnected) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -58,9 +85,7 @@ export default function UserProfile() {
                 <h1 className="text-3xl font-bold font-cairo bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent">
                   My Profile
                 </h1>
-                <p className="text-slate-600 mt-1 font-mono text-sm">
-                  {address?.slice(0, 10)}...{address?.slice(-8)}
-                </p>
+               
               </div>
             </div>
 

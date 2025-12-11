@@ -101,7 +101,7 @@ export default function Marketplace({}: MarketplaceProps) {
                   </div>
                   <Button
                     className="bg-black text-white hover:bg-slate-800 px-6 font-semibold rounded-full h-11 shadow-sm"
-                    onClick={() => window.location.href = '/profile'}
+                    onClick={() => navigate(ROUTES.USER_PROFILE)}
                   >
                     My Profile
                   </Button>

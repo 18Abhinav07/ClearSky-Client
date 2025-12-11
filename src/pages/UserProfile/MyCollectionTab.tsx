@@ -51,7 +51,7 @@ export function MyCollectionTab() {
           />
           <StatCard
             label="Can Create Derivatives"
-            value={purchases.filter(p => p.canCreateDerivative).length}
+            value={purchases.filter(p => p.can_create_derivatives).length}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -63,7 +63,7 @@ export function MyCollectionTab() {
             value={purchases.filter(p => {
               const weekAgo = new Date();
               weekAgo.setDate(weekAgo.getDate() - 7);
-              return new Date(p.purchasedAt) > weekAgo;
+              return new Date(p.purchased_at) > weekAgo;
             }).length}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -85,6 +85,7 @@ export function MyCollectionTab() {
               description: "", // This will be fetched later
               purchasedAt: asset.purchased_at,
               canCreateDerivative: asset.can_create_derivatives,
+              txHash: asset.tx_hash,
             };
             return (
               <LicenseCard
