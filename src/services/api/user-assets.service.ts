@@ -33,8 +33,8 @@ export interface BackendAsset {
 // For compatibility with existing UI components
 export interface PurchasedLicense {
   assetId: string;
-  licenseTokenId: string;  // Maps to token_id
-  ipId: string;
+  licenseTokenId?: string;  // Maps to token_id (optional after merge)
+  ipId?: string;  // Optional after merge
   derivativeId: string;
   title: string;
   description: string;

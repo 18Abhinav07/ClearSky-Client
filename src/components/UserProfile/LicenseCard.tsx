@@ -104,13 +104,17 @@ export function LicenseCard({
           <div className="flex items-center justify-between">
             <span className="text-slate-500">License Token:</span>
             <span className="font-mono text-black-300">
-              {license.licenseTokenId.slice(0, 6)}...{license.licenseTokenId.slice(-4)}
+              {license.licenseTokenId 
+                ? `${license.licenseTokenId.slice(0, 6)}...${license.licenseTokenId.slice(-4)}`
+                : 'N/A'}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-slate-500">IP Asset:</span>
             <span className="font-mono text-black-300">
-              {license.ipId.slice(0, 6)}...{license.ipId.slice(-4)}
+              {license.ipId 
+                ? `${license.ipId.slice(0, 6)}...${license.ipId.slice(-4)}`
+                : 'N/A'}
             </span>
           </div>
           <div className="flex items-center justify-between">
