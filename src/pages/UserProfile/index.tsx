@@ -7,20 +7,47 @@
  * - Tab C: My Creations (owned IP assets)
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { MyDevicesTab } from "./MyDevicesTab";
 import { MyCollectionTab } from "./MyCollectionTab";
 import { MyCreationsTab } from "./MyCreationsTab";
 import { TokenWithdraw } from "../../components/UserProfile/TokenWithdraw";
+import { useNavigate } from "react-router-dom";
+import { useAccount } from "wagmi";
 
-type Tab = "devices" | "collection" | "creations";
+type Tab =   "collection" | "creations";
 
 export default function UserProfile() {
   const { address, isAuthenticated } = useAuth();
-  const [activeTab, setActiveTab] = useState<Tab>("devices");
+  const { isConnected } = useAccount();
+  const [activeTab, setActiveTab] = useState<Tab>("collection");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const navigate = useNavigate();
 
-  if (!isAuthenticated) {
+  // Give wallet state time to sync after navigation
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsCheckingAuth(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Show loader while checking authentication state
+  if (isCheckingAuth) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 mx-auto mb-4">
+            <div className="w-16 h-16 border-4 border-sky-200 border-t-sky-600 rounded-full animate-spin"></div>
+          </div>
+          <p className="text-slate-600">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Check both auth state and wallet connection
+  if (!isAuthenticated || !address || !isConnected) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
@@ -37,17 +64,29 @@ export default function UserProfile() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
+     
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-gray-200 bg-white/80 backdrop-blur-md">
         <div className="container mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold font-cairo bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent">
-                My Profile
-              </h1>
-              <p className="text-slate-600 mt-1 font-mono text-sm">
-                {address?.slice(0, 10)}...{address?.slice(-8)}
-              </p>
+            <div className="flex items-center gap-4">
+              {/* Back Button */}
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="text-sm font-medium">Back</span>
+              </button>
+
+              <div>
+                <h1 className="text-3xl font-bold font-cairo bg-gradient-to-r from-sky-400 to-blue-600 bg-clip-text text-transparent">
+                  My Profile
+                </h1>
+               
+              </div>
             </div>
 
             {/* Token Balances Widget */}
@@ -60,16 +99,7 @@ export default function UserProfile() {
       <div className="border-b border-gray-200 bg-gray-50/30">
         <div className="container mx-auto px-6">
           <nav className="flex gap-8">
-            <TabButton
-              active={activeTab === "devices"}
-              onClick={() => setActiveTab("devices")}
-              label="My Devices"
-              icon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                </svg>
-              }
-            />
+            
             <TabButton
               active={activeTab === "collection"}
               onClick={() => setActiveTab("collection")}
@@ -96,7 +126,6 @@ export default function UserProfile() {
 
       {/* Tab Content */}
       <div className="container mx-auto px-6 py-8">
-        {activeTab === "devices" && <MyDevicesTab />}
         {activeTab === "collection" && <MyCollectionTab />}
         {activeTab === "creations" && <MyCreationsTab />}
       </div>

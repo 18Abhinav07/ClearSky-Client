@@ -51,7 +51,7 @@ export function MyCollectionTab() {
           />
           <StatCard
             label="Can Create Derivatives"
-            value={purchases.filter(p => p.canCreateDerivative).length}
+            value={purchases.filter(p => p.can_create_derivatives).length}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -63,7 +63,7 @@ export function MyCollectionTab() {
             value={purchases.filter(p => {
               const weekAgo = new Date();
               weekAgo.setDate(weekAgo.getDate() - 7);
-              return new Date(p.purchasedAt) > weekAgo;
+              return new Date(p.purchased_at) > weekAgo;
             }).length}
             icon={
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -75,20 +75,34 @@ export function MyCollectionTab() {
 
         {/* Licenses Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {purchases.map((license) => (
-            <LicenseCard
-              key={license.licenseTokenId}
-              license={license}
-              onCreateDerivative={() => setSelectedForDerivative(license)}
-              onDownloadSuccess={() => refetch()}
-            />
-          ))}
+          {purchases.map((asset) => {
+            const license: PurchasedLicense = {
+              assetId: asset.asset_id,
+              licenseTokenId: asset.license_token_id,
+              ipId: asset.ip_id,
+              derivativeId: asset.derivative_id,
+              title: "", // This will be fetched later
+              description: "", // This will be fetched later
+              purchasedAt: asset.purchased_at,
+              canCreateDerivative: asset.can_create_derivatives,
+              txHash: asset.tx_hash,
+            };
+            return (
+              <LicenseCard
+                key={asset.asset_id}
+                license={license}
+                onCreateDerivative={() => setSelectedForDerivative(license)}
+                onDownloadSuccess={() => refetch()}
+              />
+            );
+          })}
         </div>
       </div>
 
       {/* Create Derivative Modal */}
       {selectedForDerivative && (
         <CreateDerivativeModal
+          parentAssetId={selectedForDerivative.assetId}
           parentIpId={selectedForDerivative.ipId}
           parentLicenseTokenId={selectedForDerivative.licenseTokenId}
           onClose={() => setSelectedForDerivative(null)}
@@ -104,10 +118,10 @@ export function MyCollectionTab() {
 
 function StatCard({ label, value, icon }: { label: string; value: number; icon: React.ReactNode }) {
   return (
-    <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-xl">
+    <div className="p-4 bg-white/60 border border-slate-800 rounded-xl">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-slate-400">{label}</p>
+          <p className="text-sm text-black/80">{label}</p>
           <p className="text-3xl font-bold text-white mt-1">{value}</p>
         </div>
         <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400">

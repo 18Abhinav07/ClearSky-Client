@@ -6,10 +6,10 @@
  * - Create derivative option
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
-import { getDownloadUrl, type PurchasedLicense } from "../../services/api/user-assets.service";
+import { downloadDerivative, getDerivativeDetails, type PurchasedLicense } from "../../services/api/user-assets.service";
 
 interface LicenseCardProps {
   license: PurchasedLicense;
@@ -23,19 +23,54 @@ export function LicenseCard({
   onDownloadSuccess
 }: LicenseCardProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [title, setTitle] = useState(license.title || "Loading...");
+  const [description, setDescription] = useState(license.description || "Loading...");
   const toast = useToast();
+
+  useEffect(() => {
+    async function fetchDetails() {
+      if ((!license.title || !license.description) && license.derivativeId) {
+        try {
+          const details = await getDerivativeDetails(license.derivativeId);
+          const titleMatch = details.content.match(/# 📜 (.*)/);
+          const newTitle = titleMatch ? titleMatch[1] : 'Untitled Derivative';
+          
+          const locationMatch = details.content.match(/\*\*Location\*\*: (.*)/);
+          const newDescription = locationMatch ? `Location: ${locationMatch[1]}` : 'Details available in download.';
+
+          setTitle(newTitle);
+          setDescription(newDescription);
+        } catch (error) {
+          console.error("Failed to fetch derivative details:", error);
+          setTitle("Derivative");
+          setDescription("Details unavailable");
+        }
+      }
+    }
+    fetchDetails();
+  }, [license.derivativeId, license.title, license.description]);
+
 
   const handleSecureDownload = async () => {
     setIsDownloading(true);
     try {
-      // Step 1: Call the new service function with the derivative ID
-      console.log(`[LicenseCard] Getting download URL for derivative: ${license.derivativeId}`);
-      const { downloadUrl } = await getDownloadUrl(license.derivativeId);
+      console.log(`[LicenseCard] Downloading content for derivative: ${license.derivativeId}`);
+      const { content } = await downloadDerivative(license.derivativeId);
 
-      console.log("[LicenseCard] ✅ Access verified, downloading...");
+      // Create a blob from the markdown content
+      const blob = new Blob([content], { type: 'text/markdown' });
 
-      // Step 2: Open presigned URL
-      window.open(downloadUrl, "_blank");
+      // Create a temporary link to trigger the download
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${license.derivativeId}.md`; // Set a filename
+      document.body.appendChild(a);
+      a.click();
+
+      // Clean up
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
 
       toast.success("Download started successfully!");
       onDownloadSuccess?.();
@@ -47,20 +82,20 @@ export function LicenseCard({
       setIsDownloading(false);
     }
   };
-
+  
   return (
-    <div className="group relative overflow-hidden rounded-2xl border border-slate-700 bg-slate-800/50 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10">
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-700 bg-white/50 backdrop-blur-sm transition-all hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/10">
       {/* Gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+      <div className="absolute inset-0 bg-white  opacity-0  transition-opacity duration-300" />
 
       <div className="relative p-6 space-y-4">
         {/* Header */}
         <div>
-          <h3 className="text-lg font-bold text-white font-cairo line-clamp-2">
-            {license.title}
+          <h3 className="text-lg font-bold text-black font-cairo line-clamp-2">
+            {title}
           </h3>
-          <p className="text-sm text-slate-400 mt-2 line-clamp-2">
-            {license.description}
+          <p className="text-sm text-black-400 mt-2 line-clamp-2">
+            {description}
           </p>
         </div>
 
@@ -68,19 +103,23 @@ export function LicenseCard({
         <div className="space-y-2 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-slate-500">License Token:</span>
-            <span className="font-mono text-slate-300">
-              {license.licenseTokenId.slice(0, 6)}...{license.licenseTokenId.slice(-4)}
+            <span className="font-mono text-black-300">
+              {license.licenseTokenId 
+                ? `${license.licenseTokenId.slice(0, 6)}...${license.licenseTokenId.slice(-4)}`
+                : 'N/A'}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-slate-500">IP Asset:</span>
-            <span className="font-mono text-slate-300">
-              {license.ipId.slice(0, 6)}...{license.ipId.slice(-4)}
+            <span className="font-mono text-black-300">
+              {license.ipId 
+                ? `${license.ipId.slice(0, 6)}...${license.ipId.slice(-4)}`
+                : 'N/A'}
             </span>
           </div>
           <div className="flex items-center justify-between">
             <span className="text-slate-500">Purchased:</span>
-            <span className="text-slate-300">
+            <span className="text-black-300">
               {new Date(license.purchasedAt).toLocaleDateString()}
             </span>
           </div>
@@ -116,7 +155,6 @@ export function LicenseCard({
           </Button>
 
           {/* Create Derivative Button */}
-          {license.canCreateDerivative && (
             <Button
               onClick={onCreateDerivative}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-2.5 rounded-xl transition-all"
@@ -128,20 +166,10 @@ export function LicenseCard({
                 Create Derivative
               </span>
             </Button>
-          )}
         </div>
 
         {/* Security Info */}
-        <div className="pt-2">
-          <div className="flex items-start gap-2 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-            <svg className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
-            </svg>
-            <p className="text-xs text-blue-300">
-              Secure download uses wallet signature verification to ensure only license holders can access content
-            </p>
-          </div>
-        </div>
+       
       </div>
     </div>
   );

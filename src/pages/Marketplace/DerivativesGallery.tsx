@@ -5,17 +5,16 @@
  * Allows filtering by parent IP
  */
 
-import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getDerivatives } from "../../services/api/marketplace.service";
+import { getCommunityDerivatives } from "../../services/api/marketplace.service"; // Changed import
 import { DerivativeCard } from "../../components/Marketplace/DerivativeCard";
 
 export function DerivativesGallery() {
-  const [parentFilter, setParentFilter] = useState<string>("");
+  // Removed: const [parentFilter, setParentFilter] = useState<string>("");
 
   const { data: derivatives, isLoading } = useQuery({
-    queryKey: ["marketplace-derivatives", parentFilter],
-    queryFn: () => getDerivatives(parentFilter || undefined)
+    queryKey: ["marketplace-community-derivatives"], // Updated queryKey
+    queryFn: getCommunityDerivatives // Changed queryFn
   });
 
   if (isLoading) {
@@ -26,51 +25,23 @@ export function DerivativesGallery() {
     return <EmptyState />;
   }
 
-  // Get unique parent IPs for filter
-  const uniqueParents = Array.from(
-    new Set(derivatives.map(d => d.parentIpId))
-  );
-
-  return (
-    <div className="space-y-6">
-      {/* Filter Bar */}
-      {uniqueParents.length > 1 && (
-        <div className="flex items-center gap-4">
-          <label className="text-sm font-semibold text-slate-300">
-            Filter by parent:
-          </label>
-          <select
-            value={parentFilter}
-            onChange={(e) => setParentFilter(e.target.value)}
-            className="px-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
-          >
-            <option value="">All Derivatives</option>
-            {uniqueParents.map(parentId => (
-              <option key={parentId} value={parentId}>
-                {parentId.slice(0, 6)}...{parentId.slice(-4)}
-              </option>
-            ))}
-          </select>
-
-          <span className="text-sm text-slate-400">
-            {derivatives.length} derivative{derivatives.length !== 1 ? 's' : ''} found
-          </span>
+  
+    return (
+      <div className="space-y-6">
+        {/* Masonry Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-x-auto pb-4 max-h-[350px]">
+          {derivatives.map((derivative) => (
+            <div key={derivative.user_derivative_id} className="flex-shrink-0 w-90">
+            <DerivativeCard
+              key={derivative.user_derivative_id}
+              derivative={derivative}
+            />
+            </div>
+          ))}
         </div>
-      )}
-
-      {/* Masonry Grid */}
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {derivatives.map((derivative) => (
-          <DerivativeCard
-            key={derivative.childIpId}
-            derivative={derivative}
-          />
-        ))}
       </div>
-    </div>
-  );
-}
-
+    );
+  }
 function LoadingSkeleton() {
   return (
     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -86,7 +57,7 @@ function LoadingSkeleton() {
 
 function EmptyState() {
   return (
-    <div className="text-center py-16 border border-slate-700 border-dashed rounded-2xl bg-slate-900/30">
+    <div className="text-center py-16 border border-slate-700 border-dashed rounded-2xl bg-white-900/30">
       <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-800 flex items-center justify-center">
         <svg className="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />

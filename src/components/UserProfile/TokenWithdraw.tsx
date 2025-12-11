@@ -2,21 +2,22 @@
  * Token Withdraw Component
  *
  * Allows users to:
- * 1. View WIP and IP token balances
+ * 1. View WIP and IP token balances (fetched from MetaMask)
  * 2. Withdraw WIP tokens (unwrap WIP to IP)
  * 3. Deposit IP tokens (wrap IP to WIP)
  *
  * Uses Story Protocol WIP Client methods from WIPTOKEN.md
+ * Balances are fetched directly from MetaMask wallet
  */
 
 import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useStoryClient } from "../../hooks/useStoryClient";
-import { getTokenBalance } from "../../services/api/user-assets.service";
 import { Button } from "../ui/button";
 import { useToast } from "../../hooks/use-toast";
-import { parseEther } from "viem";
+import { parseEther, formatUnits } from "viem";
+import { STORY_TESTNET_CHAIN_ID } from "../../config/story-contracts";
 
 export function TokenWithdraw() {
   const storyClient = useStoryClient();
@@ -27,11 +28,54 @@ export function TokenWithdraw() {
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [depositAmount, setDepositAmount] = useState("");
 
-  // Fetch token balances
+  /**
+   * Fetch token balances from MetaMask on Story testnet
+   * IP = native balance, WIP = needs contract call (disabled for now)
+   */
   const { data: balances, refetch } = useQuery({
-    queryKey: ["token-balance"],
-    queryFn: getTokenBalance,
-    refetchInterval: 10000 // Refresh every 10 seconds
+    queryKey: ["metamask-token-balance"],
+    queryFn: async () => {
+      if (!window.ethereum) {
+        throw new Error("MetaMask not found");
+      }
+
+      try {
+        // Get connected account
+        const accounts = await window.ethereum.request({
+          method: "eth_requestAccounts",
+        }) as string[];
+
+        if (!accounts || accounts.length === 0) {
+          throw new Error("No accounts found");
+        }
+
+        const address = accounts[0];
+
+        // Get native IP balance from Story testnet
+        const balanceHex = await window.ethereum.request({
+          method: "eth_getBalance",
+          params: [address, "latest"],
+        }) as string;
+
+        const balanceWei = BigInt(balanceHex);
+        const ipBalance = formatUnits(balanceWei, 18);
+
+        console.log("[TokenWithdraw] Fetched balance from MetaMask:", {
+          address,
+          ipBalance,
+          balanceWei: balanceWei.toString(),
+        });
+
+        return {
+          ip: parseFloat(ipBalance).toFixed(4),
+          wip: "0.00", // WIP balance requires contract call - set to 0 for now
+        };
+      } catch (error) {
+        console.error("[TokenWithdraw] Failed to fetch balance:", error);
+        return { ip: "0.00", wip: "0.00" };
+      }
+    },
+    refetchInterval: 10000, // Refresh every 10 seconds
   });
 
   /**
@@ -167,12 +211,7 @@ export function TokenWithdraw() {
         </div>
 
         {/* Manage Button */}
-        <Button
-          onClick={() => setShowModal(true)}
-          className="px-4 py-2 bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-semibold rounded-xl transition-all text-sm shadow-lg shadow-sky-200"
-        >
-          Manage Tokens
-        </Button>
+      
       </div>
 
       {/* Modal - Rendered at document.body level using React Portal */}

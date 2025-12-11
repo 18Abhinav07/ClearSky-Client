@@ -6,24 +6,32 @@
  */
 
 import { useMemo } from "react";
-import { useWalletClient } from "wagmi";
+import { useWalletClient, useAccount } from "wagmi";
 import { createStoryService, StoryService } from "../services/story/StoryService";
+import { STORY_TESTNET_CHAIN_ID } from "../config/story-contracts";
 
 export function useStoryClient(): StoryService | null {
-  const { data: walletClient } = useWalletClient();
+  const { data: walletClient } = useWalletClient({ chainId: STORY_TESTNET_CHAIN_ID });
+  const { isConnected } = useAccount();
 
   const storyService = useMemo(() => {
-    if (!walletClient) {
+    if (!walletClient || !isConnected) {
+      console.log("[useStoryClient] Wallet client not ready:", {
+        hasWalletClient: !!walletClient,
+        isConnected,
+      });
       return null;
     }
 
+    console.log("[useStoryClient] Creating Story service with wallet client");
+    
     try {
       return createStoryService(walletClient);
     } catch (error) {
       console.error("[useStoryClient] Failed to create Story service:", error);
       return null;
     }
-  }, [walletClient]);
+  }, [walletClient, isConnected]);
 
   return storyService;
 }

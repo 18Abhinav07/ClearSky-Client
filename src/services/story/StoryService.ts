@@ -68,14 +68,32 @@ export class StoryService {
   constructor(walletClient: any) {
     this.walletClient = walletClient;
 
-    // Initialize Story Client
+    console.log("[StoryService] Initializing with wallet client:", {
+      address: walletClient.account?.address,
+      chainId: walletClient.chain?.id,
+    });
+
+    // Initialize Story Client with explicit chain configuration
+    // Always use Story Testnet regardless of current wallet chain
     const config: StoryConfig = {
       account: walletClient.account,
       transport: http(STORY_TESTNET_RPC),
-      chainId: STORY_TESTNET_CHAIN_ID as any,
+      chainId: 'odyssey' as any, // Story SDK uses 'odyssey' as chain identifier for testnet
     };
 
-    this.client = StoryClient.newClient(config);
+    console.log("[StoryService] Creating StoryClient with config:", {
+      rpc: STORY_TESTNET_RPC,
+      chainId: 'odyssey',
+      accountAddress: walletClient.account?.address,
+    });
+
+    try {
+      this.client = StoryClient.newClient(config);
+      console.log("[StoryService] ✅ StoryClient created successfully");
+    } catch (error) {
+      console.error("[StoryService] ❌ Failed to create StoryClient:", error);
+      throw error;
+    }
   }
 
   // ==========================================================================
