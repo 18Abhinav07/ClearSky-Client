@@ -99,15 +99,16 @@ function EmptyState() {
       <p className="text-slate-600 mb-6 max-w-md mx-auto">
         Create derivatives from your purchased licenses to start earning royalties
       </p>
-      <a
-        href="/profile"
-        className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold rounded-xl transition-all shadow-lg shadow-purple-200"
+      <button
+        onClick={() => {
+          // Redirect to marketplace
+          window.location.href = "/marketplace";
+        }}
+        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
       >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-        </svg>
-        Go to My Collection
-      </a>
+        Explore Marketplace
+      </button>
+      
     </div>
   );
 }

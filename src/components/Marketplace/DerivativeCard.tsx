@@ -116,7 +116,7 @@ export function DerivativeCard({
               <span className="text-2xl font-bold text-slate-900">
                 {derivative.price}
               </span>
-              <span className="text-slate-600 font-semibold">WIP</span>
+              <span className="text-slate-600 font-semibold">IP</span>
             </div>
             <p className="text-xs text-slate-500 mt-1">
               Custom pricing by creator

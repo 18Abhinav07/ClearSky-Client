@@ -26,7 +26,12 @@ interface MarketplaceProps {
 
 export default function Marketplace({}: MarketplaceProps) {
   const { isAuthenticated, address, isConnected, login } = useAuth();
-  const [searchParams, setSearchParams] = useState<{ type: string } | null>(null);
+  const [searchParams, setSearchParams] = useState<{
+    city?: string;
+    sensorType?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  } | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -74,12 +79,10 @@ export default function Marketplace({}: MarketplaceProps) {
 
             {/* RIGHT: Connect OR Profile (Single Conditional) */}
             <div className="flex items-center gap-3">
-               <div className="flex-1 flex items-center justify-center">
-              <a href="/" className="text-sm font-medium text-gray-700 hover:text-black transition-colors">
-                Home
-              </a>
+               <div className="flex-1 flex items-center justify-center rounded-full bg-black text-white px-4 py-2 hover:bg-slate-800 transition-colors">
+             <button onClick={() => navigate(ROUTES.LANDING)}>Home</button>
             </div>
-              {!isAuthenticated ? (
+              {!isAuthenticated || !address ? (
                 // Show Connect button when not authenticated
                 <Button
                   variant="outline"
@@ -149,21 +152,9 @@ export default function Marketplace({}: MarketplaceProps) {
           {/* Tier 1: Raw Data */}
           <section className="animate-fade-in-up">
             <div className="flex items-center justify-between mb-8">
-              <div>
-                <div className="flex items-center gap-3 mb-2">
-                  <h2 className="text-3xl font-bold text-slate-900 font-cairo">
-                    Raw Sensor Data
-                  </h2>
-                  <span className="px-3 py-1 bg-green-50 text-green-700 border border-green-200 rounded-full text-sm font-semibold">
-                    FREE
-                  </span>
-                </div>
-                <p className="text-slate-600 text-base">
-                  Direct CSV downloads from DePIN network sensors
-                </p>
-              </div>
+              
+              
             </div>
-            <RawDataList searchParams={searchParams} />
           </section>
 
           {/* Tier 2: Refined Reports (IP Assets) */}
@@ -243,17 +234,26 @@ export default function Marketplace({}: MarketplaceProps) {
 // SUB-COMPONENTS (Temporary placeholders - will be separate files)
 // ============================================================================
 
-function SearchBar({ onSearch }: { onSearch: (params: { type: string }) => void }) {
+function SearchBar({ onSearch }: { onSearch: (params: { city?: string; sensorType?: string; dateFrom?: string; dateTo?: string }) => void }) {
   const { isAuthenticated } = useAuth();
-  const [type, setType] = useState<"DAILY" | "MONTHLY">("MONTHLY");
-  const [sensorType, setSensorType] = useState<string>("ALL");
+  const [sensorType, setSensorType] = useState<string>("");
   const [city, setCity] = useState<string>("");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
   const handleSearch = () => {
     if (!isAuthenticated) {
-      return; // Don't search if not authenticated
+      return;
     }
-    onSearch({ type });
+
+    const params: { city?: string; sensorType?: string; dateFrom?: string; dateTo?: string } = {};
+    
+    if (city.trim()) params.city = city.trim();
+    if (sensorType && sensorType !== "ALL") params.sensorType = sensorType;
+    if (dateFrom) params.dateFrom = dateFrom;
+    if (dateTo) params.dateTo = dateTo;
+
+    onSearch(params);
   };
 
   // Pre-trigger search on initial load when authenticated
@@ -266,22 +266,7 @@ function SearchBar({ onSearch }: { onSearch: (params: { type: string }) => void 
 
   return (
     <div className="p-6 rounded-2xl bg-white/60 backdrop-blur-md border border-gray-200/80 shadow-sm">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Report Type Select */}
-        <div className="w-full">
-          <label className="block text-sm font-semibold text-slate-700 mb-2">
-            Report Type
-          </label>
-          <select
-            value={type}
-            onChange={(e) => setType(e.target.value as "DAILY" | "MONTHLY")}
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
-          >
-            <option value="DAILY">📅 Daily Reports</option>
-            <option value="MONTHLY">📊 Monthly Reports</option>
-          </select>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {/* Sensor Type Select */}
         <div className="w-full">
           <label className="block text-sm font-semibold text-slate-700 mb-2">
@@ -292,27 +277,53 @@ function SearchBar({ onSearch }: { onSearch: (params: { type: string }) => void 
             onChange={(e) => setSensorType(e.target.value)}
             className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
           >
-            <option value="ALL">All Sensors</option>
-            <option value="PM2.5">🌫️ PM2.5 (Fine Particles)</option>
-            <option value="PM10">💨 PM10 (Coarse Particles)</option>
-            <option value="CO2">🏭 CO2 (Carbon Dioxide)</option>
-            <option value="NO2">🚗 NO2 (Nitrogen Dioxide)</option>
-            <option value="O3">☀️ O3 (Ozone)</option>
-            <option value="SO2">🏭 SO2 (Sulfur Dioxide)</option>
+            <option value="">All Sensors</option>
+            <option value="PM2.5">🌫️ PM2.5</option>
+            <option value="PM10">💨 PM10</option>
+            <option value="CO2">🏭 CO2</option>
+            <option value="NO2">🚗 NO2</option>
+            <option value="O3">☀️ O3</option>
+            <option value="SO2">🏭 SO2</option>
           </select>
         </div>
 
         {/* City Input */}
         <div className="w-full">
           <label className="block text-sm font-semibold text-slate-700 mb-2">
-            City (Optional)
+            City
           </label>
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="e.g., Mumbai, Delhi..."
+            placeholder="e.g., Mumbai, Delhi"
             className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
+          />
+        </div>
+
+        {/* Date From */}
+        <div className="w-full">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            From Date
+          </label>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
+          />
+        </div>
+
+        {/* Date To */}
+        <div className="w-full">
+          <label className="block text-sm font-semibold text-slate-700 mb-2">
+            To Date
+          </label>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
           />
         </div>
 
@@ -330,14 +341,6 @@ function SearchBar({ onSearch }: { onSearch: (params: { type: string }) => void 
           </Button>
         </div>
       </div>
-      <p className="text-xs text-slate-500 mt-4 flex items-center gap-2">
-        <svg className="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
-          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-        </svg>
-        <span>
-          <strong>Note:</strong> Sensor type and city filters are client-side only. Backend filtering support coming soon.
-        </span>
-      </p>
     </div>
   );
 }
