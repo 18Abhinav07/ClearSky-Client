@@ -398,10 +398,8 @@ export default function Dashboard() {
                           <a href="/">
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="w-6 h-6 text-white" fill="currentColor">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                </svg>
+              <div className="w-10 h-10 bg-transparent rounded-lg flex items-center justify-center">
+                <img src="/ClearSky.png" alt="ClearSky Logo" className="w-8 h-8" />
               </div>
               <span className="text-xl font-bold text-black font-cairo">ClearSky</span>
             </div>
