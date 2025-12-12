@@ -56,6 +56,11 @@ export interface RefinedReport {
     owner_id: string;
     aqi?: number;
     timestamp?: string;
+    batch_window?: {
+      start: string;
+      end: string;
+      hour_index: number;
+    };
   }>;
 
   // Frontend display fields (parse from content or generate)

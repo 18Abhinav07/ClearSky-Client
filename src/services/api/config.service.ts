@@ -7,10 +7,10 @@
 
 import { env } from "../../config/env";
 
-export interface City {
-  city_id: string;
-  city_name: string;
-  stations: string[]; // Array of station IDs
+export interface Sensor {
+  sensor_type: string;
+  unit: string;
+  description: string;
 }
 
 export interface Station {
@@ -20,13 +20,16 @@ export interface Station {
     latitude: number;
     longitude: number;
   };
-  available_sensors: string[]; // Array of sensor types
+  owner: string;
+  provider: string;
+  available_sensors: Sensor[];
 }
 
-export interface Sensor {
-  sensor_type: string;
-  unit: string;
-  description: string;
+export interface City {
+  city_id: string;
+  city_name: string;
+  country: string;
+  stations: Station[];
 }
 
 export interface ApiResponse<T> {

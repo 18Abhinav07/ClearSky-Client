@@ -52,8 +52,19 @@ export function RefinedReportCard({
   });
   const { switchChain, isPending: isSwitchingChain } = useSwitchChain();
 
-  const dateMatch = report.content.match(/# 📜 Daily Log: (.*)/);
-  const date = dateMatch ? dateMatch[1] : '';
+  // Extract and format date from primitive_data or created_at
+  const getFormattedDate = () => {
+    const dateString = report.primitive_data?.[0]?.batch_window?.start || report.created_at;
+    if (!dateString) return '';
+
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric'
+    });
+  };
+  const date = getFormattedDate();
 
   // Handle transaction errors
   useEffect(() => {

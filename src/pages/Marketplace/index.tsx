@@ -19,6 +19,7 @@ import Cloud from "../../components/ui/Cloud";
 import { AuthModal } from "../../components/Auth/AuthModal";
 import { ROUTES } from "@/config/routes";
 import { useNavigate } from "react-router-dom";
+import { getCities, type City } from "../../services/api/config.service";
 
 interface MarketplaceProps {
   // Props can be added here if needed in the future
@@ -240,6 +241,25 @@ function SearchBar({ onSearch }: { onSearch: (params: { city?: string; sensorTyp
   const [city, setCity] = useState<string>("");
   const [dateFrom, setDateFrom] = useState<string>("");
   const [dateTo, setDateTo] = useState<string>("");
+  const [cities, setCities] = useState<City[]>([]);
+  const [loadingCities, setLoadingCities] = useState(true);
+
+  // Fetch cities on component mount
+  useEffect(() => {
+    const fetchCities = async () => {
+      try {
+        setLoadingCities(true);
+        const citiesData = await getCities();
+        setCities(citiesData);
+      } catch (error) {
+        console.error("Failed to fetch cities:", error);
+      } finally {
+        setLoadingCities(false);
+      }
+    };
+
+    fetchCities();
+  }, []);
 
   const handleSearch = () => {
     if (!isAuthenticated) {
@@ -247,7 +267,7 @@ function SearchBar({ onSearch }: { onSearch: (params: { city?: string; sensorTyp
     }
 
     const params: { city?: string; sensorType?: string; dateFrom?: string; dateTo?: string } = {};
-    
+
     if (city.trim()) params.city = city.trim();
     if (sensorType && sensorType !== "ALL") params.sensorType = sensorType;
     if (dateFrom) params.dateFrom = dateFrom;
@@ -287,18 +307,28 @@ function SearchBar({ onSearch }: { onSearch: (params: { city?: string; sensorTyp
           </select>
         </div>
 
-        {/* City Input */}
+        {/* City Dropdown */}
         <div className="w-full">
           <label className="block text-sm font-semibold text-slate-700 mb-2">
             City
           </label>
-          <input
-            type="text"
+          <select
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="e.g., Mumbai, Delhi"
-            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all"
-          />
+            disabled={loadingCities}
+            className="w-full px-4 py-3 bg-white border border-gray-300 rounded-xl text-slate-900 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <option value="">All Cities</option>
+            {loadingCities ? (
+              <option disabled>Loading cities...</option>
+            ) : (
+              cities.map((cityData) => (
+                <option key={cityData.city_id} value={cityData.city_id}>
+                  {cityData.city_name}
+                </option>
+              ))
+            )}
+          </select>
         </div>
 
         {/* Date From */}
