@@ -85,7 +85,10 @@ export function MyCollectionTab() {
               description: "", // This will be fetched later
               purchasedAt: asset.purchased_at,
               canCreateDerivative: asset.can_create_derivatives,
-              txHash: asset.tx_hash,
+              txHash: asset.purchase_tx_hash,
+              hasCreatedDerivative: asset.has_created_derivative,
+              createdDerivativeId: asset.created_derivative_id,
+              createdDerivativeTitle: asset.created_derivative_title,
             };
             return (
               <LicenseCard

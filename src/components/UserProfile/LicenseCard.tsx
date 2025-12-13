@@ -154,7 +154,8 @@ export function LicenseCard({
             )}
           </Button>
 
-          {/* Create Derivative Button */}
+          {/* Create Derivative Button - Only show if derivative hasn't been created yet */}
+          {!license.hasCreatedDerivative ? (
             <Button
               onClick={onCreateDerivative}
               className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold py-2.5 rounded-xl transition-all"
@@ -166,6 +167,21 @@ export function LicenseCard({
                 Create Derivative
               </span>
             </Button>
+          ) : (
+            <div className="w-full px-4 py-2.5 bg-green-50 border border-green-200 rounded-xl text-center">
+              <span className="flex items-center justify-center gap-2 text-green-700 text-sm font-semibold">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Derivative Created
+              </span>
+              {license.createdDerivativeTitle && (
+                <p className="text-xs text-green-600 mt-1 truncate">
+                  {license.createdDerivativeTitle}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Security Info */}

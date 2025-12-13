@@ -28,6 +28,9 @@ export interface BackendAsset {
   updatedAt?: string;
   can_create_derivatives: boolean;
   license_token_id: string;
+  has_created_derivative: boolean;
+  created_derivative_id: string | null;
+  created_derivative_title: string | null;
 }
 
 // For compatibility with existing UI components
@@ -42,6 +45,9 @@ export interface PurchasedLicense {
   txHash: string;
   canCreateDerivative: boolean;
   parentIpId?: string;
+  hasCreatedDerivative: boolean;
+  createdDerivativeId?: string | null;
+  createdDerivativeTitle?: string | null;
 }
 
 export interface OwnedIPAsset {
