@@ -221,7 +221,7 @@ export function RefinedReportCard({
     console.log("[RefinedReportCard] Current chain:", chain?.id, chain?.name);
     console.log("[RefinedReportCard] User address:", wagmiAddress);
     console.log("[RefinedReportCard] Payment recipient:", PAYMENT_ADDRESS);
-    console.log("[RefinedReportCard] Price:", report.price_wip || "1", "IP");
+    console.log("[RefinedReportCard] Price:", report.price_wip || "0.1", "IP");
 
     setIsPurchasing(true);
 
@@ -309,7 +309,7 @@ export function RefinedReportCard({
       toast("Step 1/3: Initiating payment transfer...");
 
       // Get price and ensure it's a string number
-      const priceIP = String(report.price_wip || "1");
+      const priceIP = String(report.price_wip || "0.1");
       console.log("[RefinedReportCard] Raw price from report:", report.price_wip);
       console.log("[RefinedReportCard] Price IP (string):", priceIP);
       
@@ -323,10 +323,10 @@ export function RefinedReportCard({
       console.log("  - Price (Wei in hex):", `0x${amountInWei.toString(16)}`);
       console.log("  - Chain ID:", STORY_TESTNET_CHAIN_ID);
       console.log("  - Current Wallet Chain:", chain?.id);
-      
-      // Verify the amount is reasonable (should be 1 * 10^18 = 1000000000000000000)
-      const expectedWei = BigInt("1000000000000000000"); // 1 IP in wei
-      if (priceIP === "1" && amountInWei !== expectedWei) {
+
+      // Verify the amount conversion is correct
+      const expectedWei = parseUnits(priceIP, 18);
+      if (amountInWei !== expectedWei) {
         console.error("[RefinedReportCard] ⚠️ WARNING: Amount mismatch!");
         console.error("  Expected:", expectedWei.toString());
         console.error("  Got:", amountInWei.toString());
@@ -512,7 +512,7 @@ export function RefinedReportCard({
           <div>
             <div className="flex items-baseline gap-2">
                             <span className="text-3xl font-bold text-slate-900">
-                              {report.price_wip || "1"}
+                              {report.price_wip || "0.1"}
                             </span>
               <span className="text-slate-600 font-semibold">IP</span>
             </div>
