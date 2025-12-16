@@ -417,9 +417,9 @@ Clear Sky leverages **Story Protocol's modular IP framework** for on-chain IP ma
 
 | Contract | Address (Base Sepolia) | Purpose |
 |----------|------------------------|---------|
-| **IPAssetRegistry** | `0x1234...abcd` | Mints & manages IP Assets (ERC-721) |
-| **LicensingModule** | `0x5678...ef01` | Handles license minting & verification |
-| **RoyaltyModule** | `0x9abc...def0` | Distributes revenue to IP owners |
+| **SPG_NFT_CONTRACT:** | ` "0xc32A8a0FF3beDDDa58393d022aF433e78739FAbc"` | Mints & manages IP Assets (ERC-721) |
+| **ROYALTY_POLICY_LAP:** | ` "0xBe54FB168b3c982b7AaE60dB6CF75Bd8447b390E" ` | Handles license minting & verification |
+| **WIP_TOKEN** | `0x0000000000000000000000000000000000000000` | Distributes revenue to IP owners |
 
 ### 🔧 Key Functions
 
