@@ -10,7 +10,6 @@
 [![Story Protocol](https://img.shields.io/badge/Story-Protocol-FF6B6B?style=for-the-badge)](https://storyprotocol.xyz/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.20-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)
 [![IPFS](https://img.shields.io/badge/IPFS-Decentralized-65C2CB?style=for-the-badge&logo=ipfs)](https://ipfs.io/)
-[![World ID](https://img.shields.io/badge/World-ID-000000?style=for-the-badge)](https://worldcoin.org/)
 [![Coinbase Wallet](https://img.shields.io/badge/Coinbase-Smart_Wallet-0052FF?style=for-the-badge&logo=coinbase)](https://www.coinbase.com/wallet)
 
 **Clear Sky** is a revolutionary DePIN (Decentralized Physical Infrastructure Network) application that transforms environmental sensor data into **Verifiable Intellectual Property**. By creating a cryptographic trust layer for AQI, CO2, and temperature readings, we're solving the critical problem of fake data in environmental monitoring networks while enabling sensor owners to monetize their data streams securely.
@@ -29,7 +28,7 @@ Environmental monitoring networks face a critical challenge: **data integrity**.
 - ✗ That operators aren't creating multiple fake sensors (Sybil attacks)
 - ✗ Who owns the rights to monetize specific data streams
 
-**Clear Sky** solves these problems by combining cryptographic signatures, decentralized identity, and blockchain-based IP registration.
+**Clear Sky** solves these problems by combining cryptographic signatures, decentralized identity via wallet authentication, and blockchain-based IP registration.
 
 ---
 
@@ -75,8 +74,8 @@ Environmental monitoring networks face a critical challenge: **data integrity**.
 <tr>
 <td colspan="2">
 
-### 🌐 Sybil-Resistant Onboarding
-**World ID integration** ensures sensor operators are real humans, preventing fake accounts and maintaining network trust through decentralized proof-of-personhood.
+### 🔐 Wallet-Based Authentication
+**Coinbase Smart Wallet address authentication** ensures unique operator identity. Each wallet address serves as a cryptographic identity, preventing unauthorized access while maintaining user sovereignty.
 
 </td>
 </tr>
@@ -92,7 +91,7 @@ Clear Sky operates through a series of integrated flows that ensure data integri
 Sensors sign readings with ECDSA keys → Backend canonicalizes JSON → Creates Merkle Leaves → Stores signed data with cryptographic proofs
 
 ### 2️⃣ **Identity & Onboarding**
-Operators verify humanity via World ID → Create Coinbase Smart Wallet with passkey → Register sensor devices → Link crypto identity to physical infrastructure
+Operators create Coinbase Smart Wallet with passkey → Authenticate via wallet address → Register sensor devices → Link crypto identity to physical infrastructure
 
 ### 3️⃣ **IP Registration**
 Batched sensor data → Metadata uploaded to IPFS → Smart contract mints IP Asset on Story Protocol → Returns on-chain asset ID
@@ -126,7 +125,6 @@ graph TB
 
     subgraph "Blockchain Layer"
         SP[📜 Story Protocol<br/>IP Assets]
-        WLD[🌍 World ID<br/>Sybil Resistance]
         CBW[💳 Coinbase<br/>Smart Wallet]
     end
 
@@ -140,7 +138,7 @@ graph TB
     API -->|Upload Metadata| IPFS
     API -->|Batch Mint| SP
 
-    UI -->|World ID Auth| WLD
+    UI -->|Wallet Auth| CBW
     UI -->|Gas Sponsored Txs| CBW
     UI -->|Browse & Purchase| MP
 
@@ -153,7 +151,6 @@ graph TB
     API -->|Mint Child IP| SP
 
     style SP fill:#FF6B6B
-    style WLD fill:#000000,color:#fff
     style CBW fill:#0052FF,color:#fff
     style IPFS fill:#65C2CB
 ```
@@ -244,7 +241,7 @@ sequenceDiagram
 - **Styling:** Tailwind CSS + shadcn/ui components
 - **State Management:** Zustand + TanStack Query
 - **Web3:** Wagmi + Viem, Coinbase Smart Wallet SDK
-- **Authentication:** World ID SDK
+- **Authentication:** Coinbase Smart Wallet (Passkey-based)
 
 ### **Backend**
 - **Runtime:** Node.js 22+ with Express
@@ -256,7 +253,7 @@ sequenceDiagram
 - **Smart Contracts:** Solidity 0.8.20 (Foundry)
 - **IP Protocol:** Story Protocol (IP Asset & Licensing modules)
 - **Networks:** Base Sepolia (testnet), Base (mainnet)
-- **Identity:** World ID (Worldcoin)
+- **Wallet:** Coinbase Smart Wallet (CDP)
 
 ### **AI/ML**
 - **Models:** OpenAI GPT-4, Anthropic Claude
@@ -275,7 +272,6 @@ sequenceDiagram
 - Accounts:
   - [Coinbase Developer Portal](https://portal.cdp.coinbase.com) (CDP Project ID)
   - [Story Protocol](https://storyprotocol.xyz/) (testnet access)
-  - [World ID](https://developer.worldcoin.org/) (App ID)
   - [Pinata](https://pinata.cloud/) or [Web3.Storage](https://web3.storage/) (IPFS)
 
 ---
@@ -309,10 +305,6 @@ Edit `.env` with your values:
 # ===== COINBASE DEVELOPER PLATFORM =====
 VITE_CDP_PROJECT_ID=your-cdp-project-id
 VITE_CDP_API_BASE_PATH=https://api.cdp.coinbase.com
-
-# ===== WORLD ID =====
-VITE_WORLD_ID_APP_ID=app_staging_xxxxxxxxxxxxx
-VITE_WORLD_ID_ACTION=verify-sensor-operator
 
 # ===== BACKEND API =====
 VITE_API_BASE_URL=http://localhost:3000
@@ -387,8 +379,7 @@ Client/
 │   ├── services/                 # External integrations
 │   │   ├── api/                  # Backend API clients
 │   │   ├── ipfs/                 # IPFS upload/fetch utilities
-│   │   ├── story/                # Story Protocol contract ABIs
-│   │   └── world-id/             # World ID verification
+│   │   └── story/                # Story Protocol contract ABIs
 │   │
 │   ├── hooks/                    # Custom React hooks
 │   │   ├── useAuth.ts            # Authentication & wallet
@@ -463,7 +454,7 @@ function registerDerivative(
 ### ✅ Phase 1: Foundation (Completed)
 - [x] ECDSA signing & Merkle tree verification
 - [x] Coinbase Smart Wallet integration
-- [x] World ID Sybil resistance
+- [x] Wallet address-based authentication
 - [x] Story Protocol IP minting
 - [x] Automated AI summarization pipeline
 - [x] Child IP minting for derivatives
@@ -530,7 +521,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](./LICENSE
 
 - **[Story Protocol](https://storyprotocol.xyz/)** for pioneering on-chain IP infrastructure
 - **[Coinbase](https://www.coinbase.com/)** for making Web3 accessible with Smart Wallets
-- **[Worldcoin](https://worldcoin.org/)** for decentralized proof-of-personhood
 - **[IPFS](https://ipfs.io/)** for decentralized storage
 - The **DePIN community** for inspiring real-world blockchain applications
 
